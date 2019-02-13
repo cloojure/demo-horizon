@@ -1,5 +1,6 @@
 (ns todomvc.enflame ; #todo => re-state ???
   (:require
+    [ajax.core :as ajax]
     [clojure.set :as set]
     [re-frame.core :as rf]
     [re-frame.db :as rfdb]
