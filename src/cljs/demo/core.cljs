@@ -1,8 +1,8 @@
-(ns flintstones.core
+(ns demo.core
   (:require
     [devtools.core :as devtools]
+    [demo.bambam :as bambam]
     [goog.events]
-    [flintstones.slate :as slate]
     [reagent.core :as r]
    ;[bidi.bidi :as bidi]
     [todomvc.components :as components]
@@ -16,10 +16,10 @@
 ; NOTE:  it seems this must be in a *.cljs file or it doesn't work on figwheel reloading
 (enable-console-print!)
 (println
-"This text is printed from src/flintstones/core.cljs.
+"This text is printed from src/demo/core.cljs.
 Go ahead and edit it and see reloading in action. Again, or not.")
 (println "Hello World! " )
-(println "Hello addition:  " (slate/add2 2 3) )
+(println "Hello addition:  " (bambam/add2 2 3) )
 (t/spyx :something (+ 2 3) [1 2 3])
 
 ;---------------------------------------------------------------------------------------------------

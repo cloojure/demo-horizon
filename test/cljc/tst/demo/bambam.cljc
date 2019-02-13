@@ -1,9 +1,9 @@
-(ns tst.flintstones.bambam
+(ns tst.demo.bambam
   (:require
-    #?@(:clj [[flintstones.test-clj   :refer [dotest is isnt is= isnt= testing define-fixture]]
-              [flintstones.bambam :as bam]])
-    #?@(:cljs [[flintstones.test-cljs :refer [dotest is isnt is= isnt= testing define-fixture]]
-               [flintstones.bambam :as bam :include-macros true]])
+    #?@(:clj [[demo.test-clj   :refer [dotest is isnt is= isnt= testing define-fixture]]
+              [demo.bambam :as bam]])
+    #?@(:cljs [[demo.test-cljs :refer [dotest is isnt is= isnt= testing define-fixture]]
+               [demo.bambam :as bam :include-macros true]])
   ))
 
 (define-fixture :once
