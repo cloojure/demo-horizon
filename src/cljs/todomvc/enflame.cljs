@@ -110,7 +110,7 @@
     {:id    :app-state-intc
      :enter (fn app-state-intc-enter
               [ctx]
-              ;(js/console.info :app-state-intc-enter :begin (ctx-trim ctx))
+             ;(println :app-state-intc-enter :enter (ctx-trim ctx))
               (let [ctx-out (-> ctx
                               (t/glue {:data/type :enflame/context
                                        :app-state @rfdb/app-db
@@ -119,17 +119,21 @@
                                        :event     (t/fetch-in ctx [:coeffects :event])})
                               (dissoc :coeffects))]
                 (t/with-result ctx-out
-                  (println :app-state-intc-enter :end (ctx-trim ctx-out)))))
+                 ;(println :app-state-intc-enter :end (ctx-trim ctx-out))
+                )))
      :leave (fn app-state-intc-leave
               [ctx]
               (t/with-result ctx
                 (let [app-state (t/grab :app-state ctx)]
                   (if-not (identical? @rfdb/app-db app-state)
                     (do
-                      (println :app-state-intc-leave "resetting rfdb/app-db atom..." :ctx (ctx-trim ctx))
+                     ;(t/spy :app-state-intc-leave "rfdb/app-db atom - resetting...")
                       (reset! rfdb/app-db app-state))
-                    (do (println :app-state-intc-leave "rfdb/app-db atom unchanged" :ctx (ctx-trim ctx))))
-                  )))}))
+                    (do
+                     ;(t/spy :app-state-intc-leave "rfdb/app-db atom unchanged")
+                      )))
+               ;(t/spy :app-state-intc-leave (ctx-trim ctx))
+                ))}))
 
 (def ajax-options-keys
   "Set of map keys accepted as options by cljs-ajax"

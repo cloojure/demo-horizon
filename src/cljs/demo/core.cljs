@@ -40,7 +40,7 @@ Go ahead and edit it and see reloading in action. Again, or not.")
 (defn app-start
   "Initiates the cljs application"
   []
-  (println "app-start - enter")
+  (println "**********  app-start - enter")
   (events/register-handlers)
   (flames/initialize)
 
@@ -55,14 +55,14 @@ Go ahead and edit it and see reloading in action. Again, or not.")
   (flame/dispatch-event [:ajax-demo :get "/fox.txt" {:handler       ajax-handler
                                                      :error-handler ajax-error-handler}])
 
-  (println "**********  r/render call - before")
+ ;(println "**********  r/render call - before")
   (let [the-elem (js/document.getElementById "tgt-div")]
     (t/spyx the-elem)
     (js/console.log the-elem)
     (r/render [components/root-comp] the-elem))
-  (println "**********  r/render call - after")
+ ;(println "**********  r/render call - after")
 
-  (println "app-start - leave")
+  (println "**********  app-start - leave")
 )
 
 (defonce figwheel-reload-count (atom 0))

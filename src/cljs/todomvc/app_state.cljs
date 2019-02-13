@@ -34,12 +34,12 @@
      :enter (fn [ctx]
               (let [app-state-edn-str  (.getItem js/localStorage js-localstore-key)
                     app-state-loaded (some-> app-state-edn-str (cljs.reader/read-string))
-                    >>       (println :local-store-load app-state-loaded)
+                   ;>>       (t/spy :local-store-load app-state-loaded)
                     ctx-out  (-> ctx
                                (t/glue {:app-state app-state-loaded})
                               ;(assoc :app-state app-state-default)
                                )]
-                (t/spyx :load-result (flame/ctx-trim ctx-out))
+                (t/spy :localstore-load-intc (flame/ctx-trim ctx-out))
                 ctx-out))
      :leave identity}))
 
@@ -49,7 +49,7 @@
      :enter identity
      :leave (fn [ctx]
               (let [app-state-edn-str (pr-str (t/grab :app-state ctx))]
-                (js/console.info :local-store-save app-state-edn-str)
+                (t/spy :localstore-save-intc app-state-edn-str)
                 (.setItem js/localStorage js-localstore-key app-state-edn-str))
               ctx)}))
 
