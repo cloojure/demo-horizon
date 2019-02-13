@@ -8,58 +8,6 @@
 ; NOTE:  it seems this must be in a *.cljs file or it doesn't work on figwheel reloading
 (enable-console-print!)
 
-; #todo need plumatic schema and tsk/KeyMap
-(defn set-display-mode
-  "Saves current 'showing' mode (3 filter buttons at the bottom of the display)"
-  [ctx [-e- new-filter-kw]] ; :- #{ :all, :active or :completed }
-  (t/spyx :set-display-mode new-filter-kw)
-  (let [all-filter-modes #{:all :active :completed}
-        new-filter-kw    (if (contains? all-filter-modes new-filter-kw)
-                           new-filter-kw
-                           :all)]
-    (assoc-in ctx [:app-state :display-mode] new-filter-kw)))
-
-(defn add-todo [ctx [-e- todo-title]]
-  (update-in ctx [:app-state :todos] ; #todo make this be (with-path ctx [:app-state :todos] ...) macro
-    (fn [todos]     ; #todo kill this part
-      ; must choose a new id greater than any existing id (possibly from localstore todos)
-      (let [todo-ids (keys todos)
-            new-id   (if (t/not-empty? todo-ids)
-                       (inc (apply max todo-ids))
-                       0)]
-        (t/glue todos {new-id {:id new-id :title todo-title :completed false}})))))
-
-(defn toggle-completed [ctx [-e- todo-id]]
-  (update-in ctx [:app-state :todos todo-id :completed] not))
-
-(defn update-title [ctx [-e- todo-id todo-title]]
-  (assoc-in ctx [:app-state :todos todo-id :title] todo-title))
-
-(defn delete-todo [ctx [-e- todo-id]]
-  (t/dissoc-in ctx [:app-state :todos todo-id]))
-
-(defn clear-completed-todos
-  [ctx -event-]
-  (let [todos         (t/fetch-in ctx [:app-state :todos])
-        completed-ids (->> (vals todos) ; find id's for todos where (:completed -> true)
-                        (filter :completed)
-                        (mapv :id))
-        todos-new     (reduce dissoc todos completed-ids) ; delete todos which are completed
-        ctx-out        (assoc-in ctx [:app-state :todos] todos-new)]
-    ctx-out))
-
-; #todo make example using destruct/restruct
-(defn toggle-completed-all
-  "Toggles the completed status for each todo"
-  [ctx -event-]
-  (let [todos         (t/fetch-in ctx [:app-state :todos])
-        new-completed (not-every? :completed (vals todos)) ; work out: toggle true or false?
-        todos-new     (reduce #(assoc-in %1 [%2 :completed] new-completed)
-                        todos
-                        (keys todos))
-        ctx-out        (assoc-in ctx [:app-state :todos] todos-new)]
-    ctx-out))
-
 (def common-interceptors
   [flame/trace-print
    app-state/localstore-save-intc
@@ -97,8 +45,8 @@
      :interceptor-chain [flame/trace-print app-state/localstore-save-intc ]
      :handler-fn        (fn show-registration-page
                           [ctx -event-]
-                          (let [ctx-out (assoc-in ctx [:app-state :current-page] :registration-page) ]
-                            ctx-out))})
+                          (assoc-in ctx [:app-state :current-page] :registration-page)
+                          )})
   (flame/define-event
     {:event-id          :register-name
      :interceptor-chain [ flame/trace-print app-state/localstore-save-intc ]
@@ -117,38 +65,6 @@
                                                 (assoc-in it [:app-state :reg-state :user-already-registered] false)
                                                 (assoc-in it [:app-state :usernames] usernames-out))]
                                   ctx-out)))))})
-
-
-
-  (flame/define-event
-    {:event-id          :add-todo
-     :interceptor-chain common-interceptors
-     :handler-fn        add-todo})
-
-  (flame/define-event
-    {:event-id          :toggle-completed
-     :interceptor-chain common-interceptors
-     :handler-fn        toggle-completed})
-
-  (flame/define-event
-    {:event-id          :update-title
-     :interceptor-chain common-interceptors
-     :handler-fn        update-title})
-
-  (flame/define-event
-    {:event-id          :delete-todo
-     :interceptor-chain common-interceptors
-     :handler-fn        delete-todo})
-
-  (flame/define-event
-    {:event-id          :clear-completed
-     :interceptor-chain common-interceptors
-     :handler-fn        clear-completed-todos})
-
-  (flame/define-event
-    {:event-id          :complete-all-toggle
-     :interceptor-chain common-interceptors
-     :handler-fn        toggle-completed-all})
 
   (flame/define-event
     {:event-id          :ajax-demo
