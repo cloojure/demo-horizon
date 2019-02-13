@@ -1,8 +1,8 @@
-(ns todomvc.app-state
+(ns demo.app-state
   (:require [cljs.reader]
             [cljs.spec.alpha :as s]
             [re-frame.core :as rf]
-            [todomvc.enflame :as flame]
+            [demo.enflame :as flame]
             [tupelo.core :as t]))
 
 ; NOTE:  it seems this must be in a *.cljs file or it doesn't work on figwheel reloading

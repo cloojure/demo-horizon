@@ -1,11 +1,11 @@
-(ns todomvc.components
+(ns demo.components
   "These functions are all Reagent components"
   (:require
     [clojure.string :as str]
     [goog.string :as gstring]
     [oops.core :as oops]
     [reagent.core :as r]
-    [todomvc.enflame :as flame]
+    [demo.enflame :as flame]
     [tupelo.char :as char]
     [tupelo.core :as t]
     [tupelo.string :as ts]

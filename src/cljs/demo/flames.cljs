@@ -1,6 +1,6 @@
-(ns todomvc.flames
+(ns demo.flames
   (:require
-    [todomvc.enflame :as flame]))
+    [demo.enflame :as flame]))
 
 ; NOTE:  it seems this must be in a *.cljs file or it doesn't work on figwheel reloading
 (enable-console-print!)

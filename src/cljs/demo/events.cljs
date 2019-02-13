@@ -1,8 +1,8 @@
-(ns todomvc.events
+(ns demo.events
   (:require
     [oops.core :as oops]
-    [todomvc.app-state :as app-state]
-    [todomvc.enflame :as flame]
+    [demo.app-state :as app-state]
+    [demo.enflame :as flame]
     [tupelo.core :as t]))
 
 ; NOTE:  it seems this must be in a *.cljs file or it doesn't work on figwheel reloading
@@ -16,7 +16,7 @@
 ; #todo idea: maybe move event into the ctx (like req/resp in http?)
 (defn register-handlers []
 
-  ; This event is dispatched when the app's `main` ns is loaded (todomvc.core). It establishes
+  ; This event is dispatched when the app's `main` ns is loaded (demo.core). It establishes
   ; initial application state in the context map `:app-state` key. That means merging:
   ;   1. Any todos stored in the browser's LocalStore (from the last session of this app)
   ;   2. Default initial values

@@ -5,10 +5,10 @@
     [goog.events]
     [reagent.core :as r]
    ;[bidi.bidi :as bidi]
-    [todomvc.components :as components]
-    [todomvc.enflame :as flame]
-    [todomvc.events :as events] ; These two are only required to make the compiler
-    [todomvc.flames :as flames] ; load them (see docs/Basic-App-Structure.md)
+    [demo.components :as components]
+    [demo.enflame :as flame]
+    [demo.events :as events] ; These two are only required to make the compiler
+    [demo.flames :as flames] ; load them (see docs/Basic-App-Structure.md)
     [tupelo.core :as t]
   )
   (:import [goog.history Html5History EventType]))

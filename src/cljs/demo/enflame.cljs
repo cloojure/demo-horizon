@@ -1,4 +1,4 @@
-(ns todomvc.enflame ; #todo => re-state ???
+(ns demo.enflame ; #todo => re-state ???
   (:require
     [ajax.core :as ajax]
     [clojure.set :as set]
@@ -232,7 +232,7 @@
 
 (def trace
   "An interceptor which logs/instruments an event handler's actions to
-  `js/console.log`. See examples/todomvc/src/events.cljs for use.
+  `js/console.log`. See examples/demo/src/events.cljs for use.
   Output includes:
   1. the event vector
   2. orig app-state
@@ -254,7 +254,7 @@
 
 (def trace-print
   "An interceptor which logs/instruments an event handler's actions using `println`.
-  See examples/todomvc/src/events.cljs for use.
+  See examples/demo/src/events.cljs for use.
   Output includes:
   1. the event vector
   2. orig app-state
