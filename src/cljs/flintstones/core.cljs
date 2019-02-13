@@ -8,7 +8,7 @@
     [todomvc.components :as components]
     [todomvc.enflame :as flame]
     [todomvc.events :as events] ; These two are only required to make the compiler
-    [todomvc.flames :as reactives] ; load them (see docs/Basic-App-Structure.md)
+    [todomvc.flames :as flames] ; load them (see docs/Basic-App-Structure.md)
     [tupelo.core :as t]
   )
   (:import [goog.history Html5History EventType]))
@@ -42,7 +42,7 @@ Go ahead and edit it and see reloading in action. Again, or not.")
   []
   (println "app-start - enter")
   (events/register-handlers)
-  (reactives/initialize)
+  (flames/initialize)
 
   ; Put an initial value into :app-state.
   ; Using the sync version of dispatch means that value is in place before we go onto the next step.
@@ -52,9 +52,8 @@ Go ahead and edit it and see reloading in action. Again, or not.")
   ; #todo remove this - make a built-in :init that every event-handler verifies & waits for (top priority)
   ; #todo add concept of priority to event dispatch
 
-  ;(flame/dispatch-event [:ajax-demo :get "/fox.txt" {:handler       ajax-handler
-  ;                                                   :error-handler ajax-error-handler}])
-
+  (flame/dispatch-event [:ajax-demo :get "/fox.txt" {:handler       ajax-handler
+                                                     :error-handler ajax-error-handler}])
 
   (println "**********  r/render call - before")
   (let [the-elem (js/document.getElementById "tgt-div")]

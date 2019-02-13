@@ -154,13 +154,7 @@
     {:event-id          :ajax-demo
      :interceptor-chain common-interceptors
      :handler-fn        (fn [ctx [-e- method uri opts]]
-                          (t/spyx :ajax-demo-handler-enter (flame/ctx-trim ctx))
-                          (t/spyx :ajax-demo-handler method)
-                          (t/spyx :ajax-demo-handler uri)
-                          (t/spyx :ajax-demo-handler opts)
-                          (let [ajax-ret (assoc ctx :ajax (t/glue {:method method :uri uri} opts))]
-                            (t/spyx :ajax-demo-handler-ret (flame/ctx-trim ajax-ret))
-                            ajax-ret))})
+                          (t/glue ctx {:ajax (t/glue {:method method :uri uri} opts)}))})
 
   (flame/define-event
     {:event-id          :ajax-response
