@@ -1,4 +1,4 @@
-(ns flintstones.test-clj
+(ns demo.test-clj
   (:use tupelo.core)
   (:require
     [clojure.string :as str]

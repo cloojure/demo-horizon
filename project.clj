@@ -28,12 +28,12 @@
                 :source-paths [ "src/cljc" "src/cljs" ]
                 ; The presence of a :figwheel configuration here will cause figwheel to inject the
                 ; figwheel client into your build
-                :figwheel     {:on-jsload "flintstones.core/figwheel-reload"
+                :figwheel     {:on-jsload "demo.core/figwheel-reload"
                                ; :open-urls will pop open your application in the default browser once
                                ; Figwheel has started and compiled your application.  Comment this out
                                ; once it no longer serves you.
                                :open-urls ["http://localhost:3449/index.html"]}
-                :compiler     {:main                 flintstones.core
+                :compiler     {:main                 demo.core
                                :optimizations        :none
                                :libs                 ["resources/public/libs"] ; recursive includes all children
 
@@ -42,9 +42,9 @@
                                                        :provides ["dinoPhony"]}]
                                :externs              ["dino-externs.js"]
 
-                               :output-to            "resources/public/js/compiled/flintstones.js"
-                               :output-dir           "resources/public/js/compiled/flintstones-dev"
-                               :asset-path           "js/compiled/flintstones-dev" ; rel to figwheel default of `resources/public`
+                               :output-to            "resources/public/js/compiled/demo.js"
+                               :output-dir           "resources/public/js/compiled/demo-dev"
+                               :asset-path           "js/compiled/demo-dev" ; rel to figwheel default of `resources/public`
                                ;                       ^^^^^ must match :output-dir
 
                                :source-map           true
@@ -52,7 +52,7 @@
                {:id           "test"
                 :source-paths [ "src/cljc" "test/cljc"
                                 "src/cljs" "test/cljs" ] ; #todo  :test-paths ???
-                :compiler     {:main                 tst.flintstones.doorunner
+                :compiler     {:main                 tst.demo.doorunner
                                :optimizations        :none ; :advanced
                                :libs                 ["resources/public/libs"] ; recursively includes all children
 

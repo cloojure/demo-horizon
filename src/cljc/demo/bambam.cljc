@@ -1,4 +1,4 @@
-(ns flintstones.bambam)
+(ns demo.bambam)
 
 (defmacro logr-bambam
   [& body]

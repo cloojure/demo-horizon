@@ -1,4 +1,4 @@
-(ns flintstones.test-cljs ; this file defines macros
+(ns demo.test-cljs ; this file defines macros
   (:require [cljs.test :as ct]))
 
 (comment ; #todo  new format?

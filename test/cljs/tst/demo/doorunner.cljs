@@ -4,18 +4,18 @@
 ;*************************************************************
 ;*************************************************************
 
-(ns tst.flintstones.doorunner
+(ns tst.demo.doorunner
   (:require
     [doo.runner :refer-macros [doo-tests]]
 
-    [tst.flintstones.bambam]
+    [tst.demo.bambam]
   ))
 
 (enable-console-print!)
 (println "doorunner - beginning")
 
 (doo-tests
-  'tst.flintstones.bambam
+  'tst.demo.bambam
 
 )
 (println "doorunner - end")
