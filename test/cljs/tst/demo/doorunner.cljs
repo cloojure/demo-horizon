@@ -8,14 +8,14 @@
   (:require
     [doo.runner :refer-macros [doo-tests]]
 
-    [tst.demo.bambam]
+    [tst.demo.numbers]
   ))
 
 (enable-console-print!)
 (println "doorunner - beginning")
 
 (doo-tests
-  'tst.demo.bambam
+  'tst.demo.numbers
 
 )
 (println "doorunner - end")

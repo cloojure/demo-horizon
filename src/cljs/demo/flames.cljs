@@ -12,19 +12,9 @@
      :tx-fn           (fn [app-state -query-] (:current-page app-state))})
 
   (flame/define-flame
-    {:id              :usernames
+    {:id              :upper-limit
      :reactive-inputs [:app-state]
-     :tx-fn           (fn [app-state -query-] (:usernames app-state))})
-
-  (flame/define-flame
-    {:id              :reg-state
-     :reactive-inputs [:app-state]
-     :tx-fn           (fn [app-state -query-] (:reg-state app-state))})
-
-  (flame/define-flame
-    {:id              :display-mode
-     :reactive-inputs [:app-state]
-     :tx-fn           (fn [app-state -query-] (:display-mode app-state))})
+     :tx-fn           (fn [app-state -query-] (:upper-limit app-state))})
 
   (flame/define-flame
     {:id              :ajax-response

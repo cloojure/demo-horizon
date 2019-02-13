@@ -1,7 +1,7 @@
 (ns demo.core
   (:require
     [devtools.core :as devtools]
-    [demo.bambam :as bambam]
+    [demo.numbers :as numbers]
     [goog.events]
     [reagent.core :as r]
    ;[bidi.bidi :as bidi]
@@ -19,7 +19,7 @@
 "This text is printed from src/demo/core.cljs.
 Go ahead and edit it and see reloading in action. Again, or not.")
 (println "Hello World! " )
-(println "Hello addition:  " (bambam/add2 2 3) )
+(println "Hello addition:  " (numbers/add2 2 3) )
 (t/spyx :something (+ 2 3) [1 2 3])
 
 ;---------------------------------------------------------------------------------------------------

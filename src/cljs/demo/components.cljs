@@ -54,43 +54,30 @@
 (defn registration-page []
   (let [reg-state (flame/watching [:reg-state])]
     (t/spyx reg-state)
-    [:div
-     [:div
-      [:label (str "Username:" (nbsp 2))]
-      [input-field
-       {:id          "user-name"
-        :placeholder "Joe Smith"
-        :on-save     #(when (t/not-empty? (str/trim %))
-                        (flame/dispatch-event [:register-name %]))}]]
-     [:div
-      (if (:user-already-registered reg-state)
-        [:label "Error - Username Already Registered"]
-        [:span {:style {:font-style :italic}} "username available"])]]))
+    ))
 
 (defn root-comp []       ; was simple-component
-  (let [app-state    (flame/watching [:app-state])
-        current-page (flame/watching [:current-page])]
+  (let [app-state    (flame/watching [:app-state]) ]
     [:div {:class "container"}
      [:hr]
      [:div
-      [:h1 "Calorie Counter App"]
+      [:h1 "Numbers to Strings Challenge"]
       [:hr]
-      (println :root :app-state app-state)
-      (condp = current-page
-        :registration-page [registration-page]
+      [:div
+       [:div
+        [:label (str "Enter Upper Limit:" (nbsp 2))]
+        [input-field
+         {:id          "user-name"
+          :placeholder "123"
+          :on-save     #(when (t/not-empty? (str/trim %))
+                          (flame/dispatch-event [:register-name %]))}]]
+       ]
 
-        :home-page
-        [:button {:on-click #(flame/dispatch-event [:register-begin])}
-         "Register"]
+      ]
+     [:hr]
+    ;[ajax-says]
+    ;[:hr]
 
-        [:label (str "Unknown current-page:" (nbsp 2) current-page)])]
-     [:hr]
-     [ajax-says]
-     [:hr]
-     [:div
-      [:button {:style    {:color :red}
-                :on-click #(flame/dispatch-event [:reset-db])}
-       "Reset DB"]]
      ]))
 
 
