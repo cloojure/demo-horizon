@@ -1,23 +1,33 @@
 (ns tst.demo.numbers
   (:require
-    #?@(:clj [[demo.numbers :as numbers]
-              [tupelo.test :as tst]])
-    #?@(:cljs [[demo.numbers :as numbers :include-macros true]
+    #?@(:clj [[demo.numbers :as num]
+              [tupelo.test :as tst :refer [is= dotest dotest-focus throws? ]]])
+    #?@(:cljs [[demo.numbers :as num :include-macros true]
                [tupelo.test-cljs :as tst]]))
   )
 
-(tst/dotest
+(dotest
   (println "test 1")
-  (tst/is= 2 (+ 1 1)))
+  (is= 2 (+ 1 1)))
 
-(tst/dotest
+(dotest
   (println "test 2")
-  (tst/is= 95 (numbers/add2 2 3)) ; this works
-  (tst/is= 3 (numbers/logr-numbers
+  (is= 5 (num/add2 2 3)) ; this works
+  (is= 3 (num/logr-numbers
            (inc 0)
            (inc 1)
            (inc 2))))
 
-(tst/dotest
-  (tst/throws? (numbers/number->word -1))
+(dotest
+  (throws? (num/number->word -1))
+  (is= "zero"  (num/number->word 0))
+  (is= "one"  (num/number->word 1))
+  (is= "seven"  (num/number->word 7))
+  (is= "ten"  (num/number->word 10))
+  (is= "twelve"  (num/number->word 12))
+  (is= "nineteen"  (num/number->word 19))
+
+  (is= ""  (num/hundreds-frag 99))
+  (is= "one-hundred"  (num/hundreds-frag 123))
+  (is= "nine-hundred"  (num/hundreds-frag 923))
   )

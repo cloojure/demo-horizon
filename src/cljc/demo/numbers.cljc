@@ -14,7 +14,7 @@
 
 (defn add2 [x y] (+ x y))
 
-(def MIN-VALUE 1)
+(def MIN-VALUE 0)
 (def MAX-VALUE 999)
 
 (def zero-word "zero")
@@ -44,8 +44,7 @@
    19 "nineteen"})
 
 (def tens-words
-  {1 "ten"
-   2 "twenty"
+  {2 "twenty"
    3 "thirty"
    4 "fourty"
    5 "fifty"
@@ -56,12 +55,30 @@
 
 (def hundreds-suffix "hundred")
 
+(defn digit-word
+  [num]
+  (when-not (<= 1 num 9)
+    (throw (ex-info "digit-word: number out of range" (t/vals->map num))))
+  (t/fetch digit-words num))
+
+(defn hundreds-frag
+  [num]
+  (let [hundreds (quot num 100)
+        result   (if (zero? hundreds)
+                   ""
+                   (str (digit-word hundreds) "-" hundreds-suffix))]
+    result))
+
 (defn number->word
   [num]
   (when-not (<= MIN-VALUE num MAX-VALUE)
     (throw (ex-info "number out of range" (t/vals->map MIN-VALUE MAX-VALUE num))))
-  (cond
-    (zero? num) zero-word
+  (t/spyx
+    (cond
+      (zero? num) zero-word
+      (<= 1 num 9) (t/fetch digit-words num)
+      (<= 10 num 19) (t/fetch teen-words num)
+      (<= 20 num 99) (t/fetch teen-words num)
 
-    )
+      ))
   )
