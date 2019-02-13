@@ -91,4 +91,9 @@
     (is= 12 num-letters)
     (is (t/rel= (num/letter-prob-num-words 2 4 \e) (/ 2.0 12.0) :digits 8))
     (is (t/rel= (num/letter-prob-num-words 2 4 \r) (/ 2.0 12.0) :digits 8))
-    (is (t/rel= (num/letter-prob-num-words 2 4 \w) (/ 1.0 12.0) :digits 8))))
+    (is (t/rel= (num/letter-prob-num-words 2 4 \w) (/ 1.0 12.0) :digits 8))
+
+    (is= (num/letter-stats-num-words 2 4 \r)
+      {:num-total-letters 12, :num-tgt-letter 2, :prob (/ 1.0 6.0)})
+
+    ))

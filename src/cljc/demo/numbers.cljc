@@ -112,17 +112,24 @@
   (let [freqs (frequencies (number-words-squash num-min num-max))]
     freqs))
 
-(defn letter-prob-num-words
+(defn letter-stats-num-words
   "Given a letter and the min & max of a number range (inclusive) between 0 and 999, returns the
   probability of picking that letter at random from all the text representation of numbers
-  in that range."
+  in that range, plus other stats."
   [num-min num-max tgt-letter]
   (let [freqs             (letter-freqs-num-words num-min num-max)
         num-total-letters (apply + (vals freqs))
         num-tgt-letter    (get freqs tgt-letter 0) ;default to zero if not found
         prob              (/ (double num-tgt-letter) (double num-total-letters))
-        ]
-    prob))
+        result            (t/vals->map num-total-letters num-tgt-letter prob)]
+    result))
+
+(defn letter-prob-num-words
+  "Given a letter and the min & max of a number range (inclusive) between 0 and 999, returns the
+  probability of picking that letter at random from all the text representation of numbers
+  in that range."
+  [num-min num-max tgt-letter]
+  (t/grab :prob (letter-stats-num-words num-min num-max tgt-letter)))
 
 
 
