@@ -6,7 +6,7 @@
                  [cljs-ajax "0.8.0"]
                  [org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.439"]
-                ;[org.clojure/clojurescript "1.10.516"]
+                ;[org.clojure/clojurescript "1.10.516"]  ; ***** WARNING - FAILS IN COMPILE!!! *****
                  [re-frame "0.10.6"]
                  [reagent "0.8.1"]
                  [reagent-utils "0.3.2"]
