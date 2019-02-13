@@ -26,12 +26,7 @@
      ; #todo add :event-id to handler-fn metadata
      :interceptor-chain [flame/trace-print app-state/localstore-load-intc]
      :handler-fn        (fn [ctx -event-] ; #todo => make an explicit interceptor?  #awt (:event-handler)
-                          (t/spy :initialize-app-state-enter (flame/ctx-trim ctx))
-                          (let [ctx-out ctx
-                                ;ctx-out (t/glue ctx {:app-state app-state/app-state-default})
-                                ]
-                            (t/spy :initialize-app-state-ret (flame/ctx-trim ctx-out))
-                            ctx-out))})
+                          ctx)}) ; noop
 
   (flame/define-event ;  #todo => flame/define-event-handler  #awt
     {:event-id          :reset-db
@@ -40,27 +35,27 @@
                           (let [ctx-out (t/glue ctx {:app-state app-state/app-state-default}) ]
                             ctx-out))})
 
+  ; #todo make event mechanism check each interceptor & handler-fn for legal ctx on enter and leave
   (flame/define-event
     {:event-id          :register-begin
      :interceptor-chain [flame/trace-print app-state/localstore-save-intc ]
      :handler-fn        (fn show-registration-page
                           [ctx -event-]
-                          (assoc-in ctx [:app-state :current-page] :registration-page)
-                          )})
+                          (assoc-in ctx [:app-state :current-page] :registration-page) )})
   (flame/define-event
     {:event-id          :register-name
      :interceptor-chain [ flame/trace-print app-state/localstore-save-intc ]
      :handler-fn        (fn register-name
                           [ctx event]
                           (let [[-evt- username] event
-                                >>        (t/spyx :register-name event)
+                               ;>>        (t/spyx :register-name event)
                                 usernames (get-in ctx [:app-state :usernames] {})]
                             (if (contains? usernames username)
                               (do
-                                (t/spyx :register-name :user-already-registered username)
+                               ;(t/spyx :register-name :user-already-registered username)
                                 (assoc-in ctx [:app-state :reg-state :user-already-registered] true))
                               (let [usernames-out (t/glue usernames {username {}})]
-                                (t/spyx :register-name :adding-new-user username)
+                               ;(t/spyx :register-name :adding-new-user username)
                                 (let [ctx-out (t/it-> ctx
                                                 (assoc-in it [:app-state :reg-state :user-already-registered] false)
                                                 (assoc-in it [:app-state :usernames] usernames-out))]

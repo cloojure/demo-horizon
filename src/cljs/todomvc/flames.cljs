@@ -10,10 +10,12 @@
     {:id              :current-page ; #todo move to an arg and add :id field and :tx-fnfn metadata
      :reactive-inputs [:app-state]
      :tx-fn           (fn [app-state -query-] (:current-page app-state))})
+
   (flame/define-flame
     {:id              :usernames
      :reactive-inputs [:app-state]
      :tx-fn           (fn [app-state -query-] (:usernames app-state))})
+
   (flame/define-flame
     {:id              :reg-state
      :reactive-inputs [:app-state]
@@ -22,12 +24,10 @@
   (flame/define-flame
     {:id              :display-mode
      :reactive-inputs [:app-state]
-     :tx-fn           (fn [app-state -query-]
-                        (:display-mode app-state))})
+     :tx-fn           (fn [app-state -query-] (:display-mode app-state))})
 
   (flame/define-flame
     {:id              :ajax-response
      :reactive-inputs [:app-state]
-     :tx-fn           (fn [app-state -query-]
-                        (:ajax-response app-state))})
+     :tx-fn           (fn [app-state -query-] (:ajax-response app-state))})
   )

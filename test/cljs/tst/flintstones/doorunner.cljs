@@ -8,7 +8,6 @@
   (:require
     [doo.runner :refer-macros [doo-tests]]
 
-    [tst.flintstones.slate]
     [tst.flintstones.bambam]
   ))
 
@@ -16,7 +15,7 @@
 (println "doorunner - beginning")
 
 (doo-tests
-  'tst.flintstones.slate
   'tst.flintstones.bambam
+
 )
 (println "doorunner - end")

@@ -88,20 +88,21 @@
     {:id    :dispatch-all-intc
      :enter identity
      :leave (fn dispatch-all-intc-leave
-              [ctx] ; #todo (with-result ctx ...)
-              ;(println :dispatch-all-intc :enter (ctx-trim ctx))
-              (let [dispatch-cmd      (let [cmd (:dispatch ctx)]
-                                        (if cmd [cmd] []))
-                    dispatch-n-cmds   (get ctx :dispatch-n [])
-                    dispatch-all-cmds (get ctx :dispatch-all [])
-                    dispatch-cmds     (t/glue dispatch-cmd dispatch-n-cmds dispatch-all-cmds)]
-                ;(println :dispatch-all-intc :dispatch-cmds dispatch-cmds)
-                (doseq [dispatch-cmd dispatch-cmds]
-                  (if-not (vector? dispatch-cmd)
-                    (rflog/console :error "dispatch-all-intc: bad dispatch-cmd=" dispatch-cmd)
-                    (rfr/dispatch dispatch-cmd))))
-              ;(println :dispatch-all-intc :leave)
-              ctx)}))
+              [ctx]
+              (t/with-result ctx
+                ;(println :dispatch-all-intc :enter (ctx-trim ctx))
+                (let [dispatch-cmd      (let [cmd (:dispatch ctx)]
+                                          (if cmd [cmd] []))
+                      dispatch-n-cmds   (get ctx :dispatch-n [])
+                      dispatch-all-cmds (get ctx :dispatch-all [])
+                      dispatch-cmds     (t/glue dispatch-cmd dispatch-n-cmds dispatch-all-cmds)]
+                  (println :dispatch-all-intc :dispatch-cmds dispatch-cmds)
+                  (doseq [dispatch-cmd dispatch-cmds]
+                    (if-not (vector? dispatch-cmd)
+                      (rflog/console :error "dispatch-all-intc: bad dispatch-cmd=" dispatch-cmd)
+                      (rfr/dispatch dispatch-cmd))))
+                (println :dispatch-all-intc :leave)
+                ))}))
 
 (def app-state-intc
   "Interceptor for managing app state"
@@ -117,17 +118,18 @@
                                        ; KLUDGE:   Allows us to use unmodified re-frame as "hosting" lib
                                        :event     (t/fetch-in ctx [:coeffects :event])})
                               (dissoc :coeffects))]
-                (println :app-state-intc-enter :end (ctx-trim ctx-out))
-                ctx-out))
+                (t/with-result ctx-out
+                  (println :app-state-intc-enter :end (ctx-trim ctx-out)))))
      :leave (fn app-state-intc-leave
               [ctx]
-              (let [app-state (t/grab :app-state ctx)]
-                (if-not (identical? @rfdb/app-db app-state)
-                  (do
-                    (println :app-state-intc-leave "resetting rfdb/app-db atom..." :ctx (ctx-trim ctx))
-                    (reset! rfdb/app-db app-state))
-                  (do (println :app-state-intc-leave "rfdb/app-db atom unchanged" :ctx (ctx-trim ctx))))
-                ctx))}))
+              (t/with-result ctx
+                (let [app-state (t/grab :app-state ctx)]
+                  (if-not (identical? @rfdb/app-db app-state)
+                    (do
+                      (println :app-state-intc-leave "resetting rfdb/app-db atom..." :ctx (ctx-trim ctx))
+                      (reset! rfdb/app-db app-state))
+                    (do (println :app-state-intc-leave "rfdb/app-db atom unchanged" :ctx (ctx-trim ctx))))
+                  )))}))
 
 (def ajax-options-keys
   "Set of map keys accepted as options by cljs-ajax"
@@ -139,22 +141,22 @@
   (interceptor
     {:id    :ajax-intc
      :enter identity
-     :leave (fn [ctx] ; #todo (with-result ctx ...)
-              (let [ajax (:ajax ctx)]
-               ;(t/spyx :ajax-intc-start ctx)
-               ;(t/spyx :ajax-intc-start ajax)
-                (when-not (nil? ajax)
-                  (let [method            (t/grab :method ajax)
-                        uri               (t/grab :uri ajax)
-                        ajax-opts-present (set/intersection (set (keys ajax)) ajax-options-keys)
-                        opts-map          (t/submap-by-keys ajax ajax-opts-present)]
-                   ;(t/spy :ajax-intc-ready (t/vals->map method uri opts-map))
-                    (condp = method
-                      :get (ajax/GET uri opts-map)
-                      :put (ajax/PUT uri opts-map)
-                      :post (ajax/POST uri opts-map)
-                      (throw (ex-info "ajax-intc: unrecognized :method" ajax))))))
-              ctx)}))
+     :leave (fn [ctx]
+              (t/with-result ctx
+                (let [ajax (:ajax ctx)]
+                  ;(t/spyx :ajax-intc-start ctx)
+                  ;(t/spyx :ajax-intc-start ajax)
+                  (when-not (nil? ajax)
+                    (let [method            (t/grab :method ajax)
+                          uri               (t/grab :uri ajax)
+                          ajax-opts-present (set/intersection (set (keys ajax)) ajax-options-keys)
+                          opts-map          (t/submap-by-keys ajax ajax-opts-present)]
+                      ;(t/spy :ajax-intc-ready (t/vals->map method uri opts-map))
+                      (condp = method
+                        :get (ajax/GET uri opts-map)
+                        :put (ajax/PUT uri opts-map)
+                        :post (ajax/POST uri opts-map)
+                        (throw (ex-info "ajax-intc: unrecognized :method" ajax))))))))}))
 
 
 ;---------------------------------------------------------------------------------------------------
@@ -221,8 +223,6 @@
 
 ; #todo need macro  (with-path state [:app-state :todos] ...) ; extract and replace in ctx
 
-; #todo macro  (with-result some-val ...) always returns some-val (like identity-with-side-effects)
-
 ;---------------------------------------------------------------------------------------------------
 ; tracing interceptor (modified rfstd/debug
 
@@ -235,18 +235,18 @@
   3. new app-state          "
   (interceptor
     {:id    :trace
-     :enter (fn trace-enter ; #todo => (with-result context ...)
+     :enter (fn trace-enter
               [ctx]
               (t/with-result ctx
                 (let [ctx (ctx-trim ctx)]
                   (rflog/console :log "Handling re-frame event:" (t/grab :event ctx))
-                  (rflog/console :log :trace :enter ctx))) )
+                  (rflog/console :log :trace :enter ctx))))
 
-     :leave (fn trace-leave ; #todo => (with-result context ...)
+     :leave (fn trace-leave
               [ctx]
               (t/with-result ctx
                 (let [ctx (ctx-trim ctx)]
-                  (rflog/console :log :trace :leave ctx))) )}))
+                  (rflog/console :log :trace :leave ctx))))}))
 
 (def trace-print
   "An interceptor which logs/instruments an event handler's actions using `println`.
@@ -257,17 +257,15 @@
   3. new app-state     "
   (interceptor
     {:id    :trace-print
-
      :enter (fn trace-print-enter
               [ctx]
               (t/with-result ctx
                 (println :trace-print-enter :event (t/grab :event ctx))
-                (println :trace-print-enter :ctx (ctx-trim ctx))) )
-
-     :leave (fn trace-print-leave ; #todo => (with-result context ...)
+                (println :trace-print-enter :ctx (ctx-trim ctx))))
+     :leave (fn trace-print-leave
               [ctx]
               (t/with-result ctx
-                (println :trace-print-leave :ctx (ctx-trim ctx))) )}))
+                (println :trace-print-leave :ctx (ctx-trim ctx))))}))
 
 ; #todo   => (event-handler-set!    :evt-name  (fn [& args] ...)) or subscribe-to  subscribe-to-event
 ; #todo   => (event-handler-clear!  :evt-name)
