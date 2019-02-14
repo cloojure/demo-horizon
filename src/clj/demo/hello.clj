@@ -12,7 +12,8 @@
     [tupelo.pedestal :as tp]
     [tupelo.schema :as tsk]
     [tupelo.string :as ts]
-   ))
+   )
+  (:gen-class))
 
 ; Prismatic Schema type definitions
 (s/set-fn-validation! true) ; enforce fn schemas

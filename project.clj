@@ -37,12 +37,14 @@
   :source-paths   [ "src/cljc" "src/clj" ]
   :test-paths     [ "test/cljc" "test/clj" ]
   :global-vars    {*warn-on-reflection* false}
-  :main ^:skip-aot demo.hello
+  :main  demo.hello ; ^:skip-aot   <=  when use this????
 
   ; need to add the compliled assets to the :clean-targets
   :clean-targets ^{:protect false} ["resources/public/js/compiled"
                                     "out"
                                     :target-path]
+  :auto-clean false ; ***** VERY IMPORTANT **** else 'lein uberjar' does 'clean' first & deletes demo.js !!!
+  :profiles {:uberjar {:aot :all}}
 
   :cljsbuild {:builds
               [{:id           "dev"

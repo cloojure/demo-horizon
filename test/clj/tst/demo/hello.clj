@@ -128,10 +128,10 @@
 
   (let [resp (pedtst/response-for (service-fn) :get "/greet" :headers {tp/accept tp/application-edn})]
     (is= (grab :status resp) 200)
-    (is= tp/application-edn (fetch-in resp [:headers tp/content-type])))
+    (is= tp/text-plain (fetch-in resp [:headers tp/content-type])))
 
   (let [resp (pedtst/response-for (service-fn) :get "/greet"
                :headers {tp/accept (str/join ", " [tp/application-xml tp/application-json])})]
     (is= (grab :status resp) 200)
-    (is= tp/application-json (fetch-in resp [:headers tp/content-type]))))
+    (is= tp/text-plain (fetch-in resp [:headers tp/content-type]))))
 
