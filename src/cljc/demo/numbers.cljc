@@ -90,11 +90,15 @@
 
 (defn number->text-squash
   [num]
-  (t/it-> num
-    (number->text it)
-    (t/str->chars it)
-    (t/drop-if #(contains? #{\- \space} %) it)
-    (str/join it)) )
+  (if-not (<= MIN-VALUE num MAX-VALUE)
+    (do
+      (println (str :number->text-squash :out-of-range "******* " num " *******"))
+      "")
+    (t/it-> num
+      (number->text it)
+      (t/str->chars it)
+      (t/drop-if #(contains? #{\- \space} %) it)
+      (str/join it))))
 
 (defn number-words-squash
   "Given the min & max of a number range (inclusive) between 0 and 999, returns a vector
