@@ -31,6 +31,13 @@
   {:leave (fn [context]
             (assoc context :response (ok (slurp (io/resource "music.txt")))))})
 
+(tp/definterceptor demo-intc
+  {:leave (fn [ctx]
+            (assoc ctx :response
+                       (glue (ok (slurp (io/resource "public/demo.html")))
+                         {:headers {"Content-Security-Policy" "script-src 'self' 'unsafe-inline' "
+                                    "Content-Type" "text/html"}})))})
+
 (def unmentionables #{"YHWH" "Voldemort" "Mxyzptlk" "Rumplestiltskin" "曹操"})
 
 (def supported-types [tp/text-html tp/application-edn tp/application-json tp/text-plain] )
@@ -105,9 +112,13 @@
     #{
       (tp/table-route {:verb :get :path "/echo"  :route-name :echo  :interceptors echo-intc})
       (tp/table-route {:verb :get :path "/music" :route-name :music :interceptors music-intc})
+      (tp/table-route {:verb         :get :path "/demo" :route-name :demo
+                       :interceptors [coerce-body-intc content-negotiation-intc demo-intc]})
       (tp/table-route {:verb :get :path "/"      :route-name :index :interceptors [index-handler]})
       (tp/table-route {:verb :get :path "/greet" :route-name :greet
-                       :interceptors [coerce-body-intc content-negotiation-intc respond-hello-intc]})}))
+                       :interceptors [ ; coerce-body-intc
+                                       ; content-negotiation-intc
+                                      respond-hello-intc]})}))
 
 ;---------------------------------------------------------------------------------------------------
 ; #todo => tupelo.pedestal ???
@@ -118,11 +129,12 @@
   (grab ::http/service-fn @server-state))
 
 (def default-service-map
-  {::http/routes server-routes
-   ::http/type   :jetty
-   ::http/port   8890         ; default port
-   ::http/host   "0.0.0.0"    ; *** CRITICAL ***  to make server listen on ALL IP addrs not just `localhost`
-   ::http/join?  true         ; true => block the starting thread (want this for supervisord in prod); false => don't block
+  {::http/routes        server-routes
+   ::http/type          :jetty
+   ::http/port          8890 ; default port
+   ::http/host          "0.0.0.0" ; *** CRITICAL ***  to make server listen on ALL IP addrs not just `localhost`
+   ::http/join?         true ; true => block the starting thread (want this for supervisord in prod); false => don't block
+   ::http/resource-path "public" ; => use "resources/public" as base (see also ::http/file-path)
    })
 
 (s/defn server-config!
