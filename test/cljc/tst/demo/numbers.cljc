@@ -51,7 +51,8 @@
   (is= (num/number->text 947) "nine-hundred forty-seven"))
 
 (dotest
-  (throws? (num/number->text-squash -1))
+  (is= (num/number->text-squash -1) "")
+
   (is= (num/number->text-squash 0) "zero")
 
   (is= (num/number->text-squash 1) "one")

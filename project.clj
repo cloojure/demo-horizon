@@ -4,26 +4,46 @@
                  [binaryage/devtools "0.9.10"]
                  [binaryage/oops "0.6.4"]
                  [cljs-ajax "0.8.0"]
+                 [hiccup "1.0.5"]
+                 [http-kit "2.3.0"]
+                 [io.pedestal/pedestal.jetty "0.5.5"]
+                 [io.pedestal/pedestal.route "0.5.5"]
+                 [io.pedestal/pedestal.service "0.5.5"]
                  [org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.439"]
                 ;[org.clojure/clojurescript "1.10.516"]  ; ***** WARNING - FAILS IN COMPILE!!! *****
+                 [org.clojure/data.json "0.2.6"]
+                 [org.clojure/test.check "0.9.0"]
+                 [org.slf4j/slf4j-simple "1.7.25"]
+                 [prismatic/schema "1.1.9"]
                  [re-frame "0.10.6"]
                  [reagent "0.8.1"]
                  [reagent-utils "0.3.2"]
                  [secretary "1.2.3"]
-                 [tupelo "0.9.130"]]
-  :plugins [[com.jakemccrary/lein-test-refresh "0.23.0"]
+                 [tupelo "0.9.130"] ]
+  :plugins [[com.jakemccrary/lein-test-refresh   "0.23.0"]
+            [lein-ancient "0.6.15"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
+            [lein-codox "0.10.3"]
             [lein-doo "0.1.10"]
-            [lein-figwheel "0.5.18"]]
+            [lein-figwheel "0.5.18"] ]
 
   :doo {:karma {:config {"plugins"       ["karma-junit-reporter"]
                          "reporters"     ["progress" "junit"]
                          "junitReporter" {"outputDir" "target/test-results"}}}
         :paths {:karma   "node_modules/karma/bin/karma"
                 :phantom "node_modules/phantomjs/bin/phantomjs"}}
-  :source-paths [ "src/cljc" "src/clj" ]
-  :test-paths [ "test/cljc" "test/clj" ]
+
+  :source-paths   [ "src/cljc" "src/clj" ]
+  :test-paths     [ "test/cljc" "test/clj" ]
+  :global-vars    {*warn-on-reflection* false}
+  :main ^:skip-aot demo.hello
+
+  ; need to add the compliled assets to the :clean-targets
+  :clean-targets ^{:protect false} ["resources/public/js/compiled"
+                                    "out"
+                                    :target-path]
+
   :cljsbuild {:builds
               [{:id           "dev"
                 :source-paths [ "src/cljc" "src/cljs" ]
@@ -33,7 +53,7 @@
                                ; :open-urls will pop open your application in the default browser once
                                ; Figwheel has started and compiled your application.  Comment this out
                                ; once it no longer serves you.
-                               :open-urls ["http://localhost:3449/index.html"]}
+                               :open-urls ["http://localhost:3449/demo.html"]}
                 :compiler     {:main                 demo.core
                                :optimizations        :none
                                :libs                 ["resources/public/libs"] ; recursive includes all children
@@ -69,11 +89,6 @@
 
                                :source-map           true
                                :source-map-timestamp true}}]}
-
-  ; need to add the compliled assets to the :clean-targets
-  :clean-targets ^{:protect false} ["resources/public/js/compiled"
-                                    "out"
-                                    :target-path]
 
   ; automatically handle `--add-modules` stuff req'd for Java 9 & Java 10
   :jvm-opts ["-Xmx1g"]
