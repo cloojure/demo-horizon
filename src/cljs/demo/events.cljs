@@ -26,40 +26,36 @@
      ; #todo add :event-id to handler-fn metadata
      :interceptor-chain [flame/trace-print app-state/localstore-load-intc]
      :handler-fn        (fn [ctx -event-] ; #todo => make an explicit interceptor?  #awt (:event-handler)
-                          ctx)}) ; noop
-
-  (flame/define-event ;  #todo => flame/define-event-handler  #awt
-    {:event-id          :reset-db
-     :interceptor-chain common-interceptors
-     :handler-fn        (fn [ctx -event-] ; #todo => make an explicit interceptor?  #awt (:event-handler)
-                          (let [ctx-out (t/glue ctx {:app-state app-state/app-state-default}) ]
-                            ctx-out))})
+                          (assoc-in ctx [:app-state] app-state/default-state))})
 
   ; #todo make event mechanism check each interceptor & handler-fn for legal ctx on enter and leave
+
   (flame/define-event
-    {:event-id          :register-begin
-     :interceptor-chain [flame/trace-print app-state/localstore-save-intc ]
-     :handler-fn        (fn show-registration-page
-                          [ctx -event-]
-                          (assoc-in ctx [:app-state :current-page] :registration-page) )})
+    {:event-id          :upper-limit
+     :interceptor-chain common-interceptors
+     :handler-fn        (fn upper-limit-fn
+                          [ctx event] ; #todo  make :event a key in ctx, so this becomes a standard interceptor
+                          (let [[-evt- upper-limit] event]
+                            (t/spyx :upper-limit upper-limit)
+                            (assoc-in ctx [:app-state :upper-limit] upper-limit)))})
+
   (flame/define-event
-    {:event-id          :register-name
-     :interceptor-chain [ flame/trace-print app-state/localstore-save-intc ]
-     :handler-fn        (fn register-name
+    {:event-id          :lower-limit
+     :interceptor-chain common-interceptors
+     :handler-fn        (fn lower-limit-fn
                           [ctx event]
-                          (let [[-evt- username] event
-                               ;>>        (t/spyx :register-name event)
-                                usernames (get-in ctx [:app-state :usernames] {})]
-                            (if (contains? usernames username)
-                              (do
-                               ;(t/spyx :register-name :user-already-registered username)
-                                (assoc-in ctx [:app-state :reg-state :user-already-registered] true))
-                              (let [usernames-out (t/glue usernames {username {}})]
-                               ;(t/spyx :register-name :adding-new-user username)
-                                (let [ctx-out (t/it-> ctx
-                                                (assoc-in it [:app-state :reg-state :user-already-registered] false)
-                                                (assoc-in it [:app-state :usernames] usernames-out))]
-                                  ctx-out)))))})
+                          (let [[-evt- lower-limit] event]
+                            (t/spyx :lower-limit lower-limit)
+                            (assoc-in ctx [:app-state :lower-limit] lower-limit)))})
+
+  (flame/define-event
+    {:event-id          :tgt-letter
+     :interceptor-chain common-interceptors
+     :handler-fn        (fn tgt-letter-fn
+                          [ctx event]
+                          (let [[-evt- tgt-letter] event]
+                            (t/spyx :tgt-letter tgt-letter)
+                            (assoc-in ctx [:app-state :tgt-letter] tgt-letter)))})
 
   (flame/define-event
     {:event-id          :ajax-demo

@@ -1,7 +1,7 @@
 (ns demo.core
   (:require
     [devtools.core :as devtools]
-    [demo.numbers :as numbers]
+    [demo.numbers :as num]
     [goog.events]
     [reagent.core :as r]
    ;[bidi.bidi :as bidi]
@@ -19,8 +19,11 @@
 "This text is printed from src/demo/core.cljs.
 Go ahead and edit it and see reloading in action. Again, or not.")
 (println "Hello World! " )
-(println "Hello addition:  " (numbers/add2 2 3) )
-(t/spyx :something (+ 2 3) [1 2 3])
+;(t/spyx :something (+ 2 3) [1 2 3])
+;(t/spyx num/zero-word)
+;(t/spyx (num/two-digit-frag 21))
+;(t/spyx (num/number->text 123))
+;(t/spyx (num/letter-stats-num-words 2 4 \r))
 
 ;---------------------------------------------------------------------------------------------------
 (defn ajax-handler [response]
@@ -37,12 +40,26 @@ Go ahead and edit it and see reloading in action. Again, or not.")
 ; #todo fix secretary (-> bidi?) to avoid dup (:filter x2) and make more like pedestal
 
 ;---------------------------------------------------------------------------------------------------
+
+(defonce figwheel-reload-count (atom 0))
+(defn figwheel-reload   ; called from project.clj -> :cljsbuild -> :figwheel -> :on-jsload
+  "This fn is called automatically by Figwheel whenever you change a file."
+  []
+  (println "figwheel-reload enter => " @figwheel-reload-count)
+
+  ; must call both of these on each page reload since the contents are not top-level-def's
+  (events/register-handlers)
+  (flames/initialize)
+  (swap! figwheel-reload-count inc)
+
+  (println "figwheel-reload leave => " @figwheel-reload-count)
+  )
+
 (defn app-start
   "Initiates the cljs application"
   []
   (println "**********  app-start - enter")
-  (events/register-handlers)
-  (flames/initialize)
+  (figwheel-reload) ; force registration of flames and event handlers
 
   ; Put an initial value into :app-state.
   ; Using the sync version of dispatch means that value is in place before we go onto the next step.
@@ -55,25 +72,13 @@ Go ahead and edit it and see reloading in action. Again, or not.")
   (flame/dispatch-event [:ajax-demo :get "/fox.txt" {:handler       ajax-handler
                                                      :error-handler ajax-error-handler}])
 
- ;(println "**********  r/render call - before")
-  (let [the-elem (js/document.getElementById "tgt-div")]
-    (t/spyx the-elem)
-    (js/console.log the-elem)
-    (r/render [components/root-comp] the-elem))
- ;(println "**********  r/render call - after")
-
+  (r/render [components/root-comp] (js/document.getElementById "tgt-div"))
   (println "**********  app-start - leave")
 )
 
-(defonce figwheel-reload-count (atom 0))
-(defn figwheel-reload   ; called from project.clj -> :cljsbuild -> :figwheel -> :on-jsload
-  []
-  (enable-console-print!) ; NOTE:  it seems this must be in a *.cljs file or it doesn't work on figwheel reloading
-  (swap! figwheel-reload-count inc)
-  (println "figwheel-reload/enter => " @figwheel-reload-count))
-
 ;***************************************************************************************************
 ; kick off the app
-(app-start)
+(app-start)         ; called upon page load/reload
+
 
 

@@ -62,9 +62,10 @@
 
 (defn two-digit-frag
   [num]
-  (when-not (<= 1 num 99)
+  (when-not (<= 0 num 99)
     (throw (ex-info "digit-word: number out of range" (t/vals->map num))))
   (cond
+    (zero? num) ""
     (<= 1 num 9) (t/fetch digit-words num)
     (<= 10 num 19) (t/fetch teen-words num)
     (<= 20 num 99) (let [tens-prefix (t/fetch tens-words (quot num 10))
@@ -84,7 +85,7 @@
     (zero? num) zero-word
     :else (let [pow-01-str (two-digit-frag (mod num 100))
                 pow-2-str  (hundreds-frag num)
-                result     (str/trim (str pow-2-str " " pow-01-str)) ]
+                result     (str/trim (str pow-2-str " " pow-01-str))]
             result)))
 
 (defn number->text-squash

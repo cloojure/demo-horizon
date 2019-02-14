@@ -14,15 +14,15 @@
 ; Look in:
 ;   1.  `core.cljs` for  "(dispatch-sync [:initialise-state])"
 ;   2.  `events.cljs` for the registration of :initialise-state handler
-(def app-state-default     ; what gets put into :app-state by default.
-  {:current-page :home-page })
+(def default-state     ; what gets put into :app-state by default.
+  {:lower-limit 1 :upper-limit 123 :tgt-letter \e})
 
 ; -- Local Storage  ----------------------------------------------------------
 ; Part of the todomvc challenge is to store todos in LocalStorage, and
 ; on app startup, reload the todos from when the program was last run.
 ; But the challenge stipulates to NOT load the setting for the "showing"
 ; filter. Just the todos.
-(def js-localstore-key "calories-enflame") ; localstore key
+(def js-localstore-key "demo-enflame") ; localstore key
 
 ; Part of the TodoMVC Challenge is to store todos in local storage. Here we define an interceptor to do this.
 ; read in todos from localstore, and process into a sorted map
@@ -37,7 +37,7 @@
                    ;>>       (t/spy :local-store-load app-state-loaded)
                     ctx-out  (-> ctx
                                (t/glue {:app-state app-state-loaded})
-                              ;(assoc :app-state app-state-default)
+                               (assoc :app-state default-state)
                                )]
                 (t/spy :localstore-load-intc (flame/ctx-trim ctx-out))
                 ctx-out))
