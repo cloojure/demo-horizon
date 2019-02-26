@@ -26,7 +26,7 @@
   "Start & stop the server, even if exception occurs."
   [& forms]
   `(try
-     (server-config! tst-service-map)
+     (define-service tst-service-map)
      (server-start!) ; sends log output to stdout
      ~@forms
      (finally
@@ -52,7 +52,7 @@
         (route/try-routing-for server-routes :prefix-tree "/greet" :get))))
 
 (dotest
-  (server-config! tst-service-map)   ; mock testing w/o actually starting jetty
+  (define-service tst-service-map)   ; mock testing w/o actually starting jetty
   (let [resp (pedtst/response-for (service-fn) :get "/greet")]
     (is= (grab :status resp) 200)
     (nonblank= "Hello, World!" (grab :body resp))
@@ -80,7 +80,7 @@
 ; v2: Hello World, With Parameters (http://pedestal.io/guides/hello-world-query-parameters)
 
 (dotest
-  (server-config! tst-service-map) ; mock testing w/o actually starting jetty
+  (define-service tst-service-map) ; mock testing w/o actually starting jetty
 
   (let [resp (pedtst/response-for (service-fn) :get "/greet?name=Michael")]
     (is= (grab :status resp) 200)
@@ -111,7 +111,7 @@
 ; v3: Hello World, With Content-Types (http://pedestal.io/guides/hello-world-content-types)
 
 (dotest
-  (server-config! tst-service-map) ; mock testing w/o actually starting jetty
+  (define-service tst-service-map) ; mock testing w/o actually starting jetty
 
   (let [resp (pedtst/response-for (service-fn) :get "/greet")]
     (is= (grab :status resp) 200)

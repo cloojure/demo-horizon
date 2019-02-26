@@ -124,12 +124,17 @@
 ;---------------------------------------------------------------------------------------------------
 ; #todo => tupelo.pedestal ???
 
-(def server-state (atom nil))
+(def ^:no-doc service-state
+  "Current state of the Pedestal service"
+  (atom nil))
 
-(defn service-fn []
-  (grab ::http/service-fn @server-state))
+(defn service-fn
+  "Returns the `service-function` (which can be used for testing via pedestal.test/response-for)"
+  []
+  (grab ::http/service-fn @service-state))
 
 (def default-service-map
+  "Default options for configuring a Pedestal service"
   {::http/routes        server-routes
    ::http/type          :jetty
    ::http/port          8890 ; default port
@@ -138,19 +143,26 @@
    ::http/resource-path "public" ; => use "resources/public" as base (see also ::http/file-path)
    })
 
-(s/defn server-config!
-  ([] (server-config! {}))
+(s/defn define-service
+  "Configures a Pedestal service by merging user-supplied options to the default configuration map"
+  ([] (define-service {}))
   ([server-opts :- tsk/KeyMap]
     (let [opts-to-use (glue default-service-map server-opts)]
-      (reset! server-state (http/create-server opts-to-use)))))
+      (reset! service-state (http/create-server opts-to-use)))))
 
-(defn server-start! []
-  (swap! server-state http/start))
+(defn server-start!
+  "Starts the Jetty HTTP server for a Pedestal service as configured via `define-service`"
+  []
+  (swap! service-state http/start))
 
-(defn server-stop! []
-  (swap! server-state http/stop))
+(defn server-stop!
+  "Stops the Jetty HTTP server."
+  []
+  (swap! service-state http/stop))
 
-(defn server-restart! []
+(defn server-restart!
+  "Stops and restarts the Jetty HTTP server for a Pedestal service"
+  []
   (server-stop!)
   (server-start!))
 ;---------------------------------------------------------------------------------------------------
@@ -158,10 +170,10 @@
 (defn -main [& args]
   (println "main - enter")
   (if (empty? args)
-    (server-config!)
+    (define-service)
     (let [port-str (first args)
           port     (tpar/parse-int port-str)]
-      (server-config! {::http/port port})))
+      (define-service {::http/port port})))
   (server-start!)
   (println "main - exit"))
 

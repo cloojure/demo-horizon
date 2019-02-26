@@ -1,14 +1,13 @@
 (ns demo.core
   (:require
-    [devtools.core :as devtools]
-    [demo.numbers :as num]
-    [goog.events]
-    [reagent.core :as r]
    ;[bidi.bidi :as bidi]
     [demo.components :as components]
     [demo.enflame :as flame]
-    [demo.events :as events] ; These two are only required to make the compiler
-    [demo.flames :as flames] ; load them (see docs/Basic-App-Structure.md)
+    [demo.events :as events]
+    [demo.flames :as flames]
+    [devtools.core :as devtools]
+    [goog.events]
+    [reagent.core :as r]
     [tupelo.core :as t]
   )
   (:import [goog.history Html5History EventType]))
@@ -19,11 +18,7 @@
 "This text is printed from src/demo/core.cljs.
 Go ahead and edit it and see reloading in action. Again, or not.")
 (println "Hello World! " )
-;(t/spyx :something (+ 2 3) [1 2 3])
-;(t/spyx num/zero-word)
-;(t/spyx (num/two-digit-frag 21))
-;(t/spyx (num/number->text 123))
-;(t/spyx (num/letter-stats-num-words 2 4 \r))
+(t/spyx :something (+ 2 3) [1 2 3])
 
 ;---------------------------------------------------------------------------------------------------
 (defn ajax-handler [response]
@@ -31,7 +26,7 @@ Go ahead and edit it and see reloading in action. Again, or not.")
   (flame/dispatch-event [:ajax-response response]) )
 
 (defn ajax-error-handler [{:keys [status status-text]}]
-  (.log js/console (str "cljs-ajax: something bad happened:  " status " " status-text)))
+  (js/console.log (str "cljs-ajax: something bad happened:  " status " " status-text)))
 
 ; -- Debugging aids ----------------------------------------------------------
 (devtools/install!) ; we love https://github.com/binaryage/cljs-devtools
@@ -52,8 +47,7 @@ Go ahead and edit it and see reloading in action. Again, or not.")
   (flames/initialize)
   (swap! figwheel-reload-count inc)
 
-  (println "figwheel-reload leave => " @figwheel-reload-count)
-  )
+  (println "figwheel-reload leave => " @figwheel-reload-count))
 
 (defn app-start
   "Initiates the cljs application"
