@@ -89,8 +89,11 @@
         [input-field
          {:id      :tgt-letter
           :value   (str tgt-letter)
-          :on-save #(when (t/not-empty? (str/trim %))
-                      (flame/dispatch-event [:tgt-letter %]))}]]
+          :on-save (fn [arg]
+                     (let [letter (str/trim arg)]
+                       (when (and (= 1 (count letter))
+                               (char/alpha? letter))
+                         (flame/dispatch-event [:tgt-letter letter]))))}]]
        [:hr]
        [:div [:label (str "Results")]]
        [:div (nbsp 2)]

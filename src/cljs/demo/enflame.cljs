@@ -58,14 +58,13 @@
 ;---------------------------------------------------------------------------------------------------
 
 ; #todo protect with a regex to make more like java
-(defn parse-int     ; :- s/Int ; #todo => tupelo.cljs.parse
+(s/defn parse-int     :- s/Int ; #todo => tupelo.cljs.parse
   "( [str-val]
      [str-val :default default-val] )
    A thin wrapper around js/parseInt  Parses the string str-val into a integer.
    If the optional default-val is specified, it will be returned in the event of an
    Nan."
-  ([str-val         ; :- s/Str
-    ]
+  ([str-val :- s/Str]
    (let [result (js/parseInt (str/trim str-val))]
      (when (js/isNaN result)
        (throw (ex-info "parse-int: could not parse input value" ;(t/vals->map str-val)
@@ -76,14 +75,13 @@
      (parse-int str-val))))
 
 ; #todo protect with a regex to make more like java
-(defn parse-float ; :- s/Num ; #todo => tupelo.cljs.parse
+(s/defn parse-float :- s/Num ; #todo => tupelo.cljs.parse
   "( [str-val]
      [str-val :default default-val] )
    A thin wrapper around js/parseFloat.  Parses the string str-val into a float.
    If the optional default-val is specified, it will be returned in the event of an
    NaN."
-  ([str-val         ; :- s/Str
-    ]
+  ([str-val :- s/Str ]
    (let [result (js/parseFloat (str/trim str-val))]
      (when (js/isNaN result)
        (throw (ex-info "parse-float: could not parse input value" ; (t/vals->map str-val)
