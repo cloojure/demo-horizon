@@ -8,18 +8,12 @@
     [demo.enflame :as flame]
     [tupelo.char :as char]
     [tupelo.core :as t]
+    [tupelo.parse :as parse]
     [tupelo.string :as ts]
     ))
 
 ; NOTE:  it seems this must be in a *.cljs file or it doesn't work on figwheel reloading
 (enable-console-print!)
-
-; #todo => tupelo.char
-(def nbsp-char  (gstring/unescapeEntities "&nbsp;")) ; get a char we can use in hiccup
-(defn nbsp
-  "Return a string of N non-breaking-space (NBSP) chars (default=1)."
-  ([] (nbsp 1))
-  ([N] (str/join (repeat N nbsp-char))))
 
 (defn input-field
   [{:keys [value on-save on-stop]}] ; #todo -> (with-map-vals [title on-save on-stop] ...)
@@ -52,7 +46,7 @@
 ;(defn ajax-says []
 ;  [:div
 ;   [:span {:style {:color :darkgreen}} [:strong "AJAX says: "]]
-;   [:span {:style {:font-style :italic}} (nbsp 2) (flame/watching [:ajax-response])]])
+;   [:span {:style {:font-style :italic}} (char/nbsp 2) (flame/watching [:ajax-response])]])
 
 (defn root-comp []
   (let [upper-limit (flame/watching [:upper-limit])
@@ -66,26 +60,26 @@
       [:hr]
       [:div
        [:div
-        [:label (str "Lower Limit:" (nbsp 2))]
+        [:label (str "Lower Limit:" (char/nbsp 2))]
         [input-field
          {:id      :lower-limit
           ;:placeholder lower-limit
           :value   (str lower-limit)
           :on-save (fn [str-arg]
-                     (let [limit (flame/parse-int str-arg nil)]
+                     (let [limit (parse/parse-int str-arg nil)]
                        (when-not (nil? limit)
                          (flame/dispatch-event [:lower-limit limit]))))}]]
        [:div
-        [:label (str "Upper Limit:" (nbsp 2))]
+        [:label (str "Upper Limit:" (char/nbsp 2))]
         [input-field
          {:id      :upper-limit
           :value   (str upper-limit)
           :on-save (fn [str-arg]
-                     (let [limit (flame/parse-int str-arg nil)]
+                     (let [limit (parse/parse-int str-arg nil)]
                        (when-not (nil? limit)
                          (flame/dispatch-event [:upper-limit limit]))))}]]
        [:div
-        [:label (str "Target Letter:" (nbsp 2))]
+        [:label (str "Target Letter:" (char/nbsp 2))]
         [input-field
          {:id      :tgt-letter
           :value   (str tgt-letter)
@@ -96,18 +90,18 @@
                          (flame/dispatch-event [:tgt-letter letter]))))}]]
        [:hr]
        [:div [:label (str "Results")]]
-       [:div (nbsp 2)]
+       [:div (char/nbsp 2)]
        [:div
         [:span
-         [:label (str "Num Target Letter:" (nbsp 4))]
+         [:label (str "Num Target Letter:" (char/nbsp 4))]
          [:label (t/grab :num-tgt-letter stats)]]]
        [:div
         [:span
-         [:label (str "Total Target Letters:" (nbsp 2))]
+         [:label (str "Total Target Letters:" (char/nbsp 2))]
          [:label (t/grab :num-total-letters stats)]]]
        [:div
         [:span
-         [:label (str "Target Letter Prob:" (nbsp 4))]
+         [:label (str "Target Letter Prob:" (char/nbsp 4))]
          [:label (t/grab :prob stats)]]]
        ]]
      [:hr]

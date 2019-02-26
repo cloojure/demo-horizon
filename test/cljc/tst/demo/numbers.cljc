@@ -98,10 +98,6 @@
     (is= (num/letter-stats-num-words 2 4 \r)
       {:num-total-letters 12, :num-tgt-letter 2, :prob (/ 1.0 6.0)}) ))
 
-(dotest
-  (t/spyx (flame/parse-int "123"))
-  (t/spyx (flame/parse-float "1.23"))
-  )
 
 
 
