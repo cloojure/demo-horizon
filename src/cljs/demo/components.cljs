@@ -29,7 +29,8 @@
     (fn [props]
       [:input
        (merge (dissoc props :on-save :on-stop :value)
-         {:type        "text"
+         {          ; #todo need to add a validator fn (turn red if hit <ret> with bad value)
+          :type        "text"
           :value       @text-val
           :auto-focus  true
           :on-blur     save-fn
