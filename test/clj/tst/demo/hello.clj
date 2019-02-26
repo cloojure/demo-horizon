@@ -83,29 +83,35 @@
   (define-service tst-service-map) ; mock testing w/o actually starting jetty
 
   (let [resp (pedtst/response-for (service-fn) :get "/greet?name=Michael")]
-    (is= (grab :status resp) 200)
-    (nonblank= (grab :body resp) "Hello, Michael!"))
+    (destruct [resp {:status ? :body ?}]
+      (is= status 200)
+      (nonblank= body "Hello, Michael!")))
 
   (let [resp (pedtst/response-for (service-fn) :get "/greet?name=")]
-    (is= (grab :status resp) 200)
-    (nonblank= (grab :body resp) "Hello, World!"))
+    (destruct [resp {:status ? :body ?}]
+      (is= status 200)
+      (nonblank= body "Hello, World!")))
 
   (let [resp (pedtst/response-for (service-fn) :get "/greet")]
-    (is= (grab :status resp) 200)
-    (nonblank= (grab :body resp) "Hello, World!"))
+    (destruct [resp {:status ? :body ?}]
+      (is= status 200)
+      (nonblank= body "Hello, World!")))
 
   ; test the unmentionables
   (let [resp (pedtst/response-for (service-fn) :get "/greet?name=YHWH")]
-    (is= (grab :status resp) 404)
-    (nonblank= (grab :body resp) "Not found"))
+    (destruct [resp {:status ? :body ?}]
+      (is= status 404)
+      (nonblank= body "Not found")))
 
   (let [resp (pedtst/response-for (service-fn) :get "/greet?name=Voldemort")]
-    (is= (grab :status resp) 404)
-    (nonblank= (grab :body resp) "Not found"))
+    (destruct [resp {:status ? :body ?}]
+      (is= status 404)
+      (nonblank= body "Not found")))
 
   (let [resp (pedtst/response-for (service-fn) :get "/greet?name=voldemort")]
-    (is= (grab :status resp) 200)
-    (nonblank= (grab :body resp) "Hello, voldemort!"))) ; case-sensitive test
+    (destruct [resp {:status ? :body ?}]
+      (is= status 200)
+      (nonblank= body "Hello, voldemort!")))) ; case-sensitive test
 
 ;---------------------------------------------------------------------------------------------------
 ; v3: Hello World, With Content-Types (http://pedestal.io/guides/hello-world-content-types)
@@ -114,17 +120,18 @@
   (define-service tst-service-map) ; mock testing w/o actually starting jetty
 
   (let [resp (pedtst/response-for (service-fn) :get "/greet")]
-    (is= (grab :status resp) 200)
-    (is= (grab :headers resp)
-      {tp/strict-transport-security         "max-age=31536000; includeSubdomains",
-       tp/x-frame-options                   "DENY",
-       tp/x-content-type-options            "nosniff",
-       tp/x-xss-protection                  "1; mode=block",
-       tp/x-download-options                "noopen",
-       tp/x-permitted-cross-domain-policies "none",
-       tp/content-security-policy           "object-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'strict-dynamic' https: http:;",
-       tp/content-type                      tp/text-plain})
-    (is= tp/text-plain (fetch-in resp [:headers tp/content-type])))
+    (destruct [resp {:status ? :headers ? :body ?}]
+      (is= status 200)
+      (nonblank= body "  Hello,    World!   ")
+      (is= headers
+        {tp/strict-transport-security         "max-age=31536000; includeSubdomains",
+         tp/x-frame-options                   "DENY",
+         tp/x-content-type-options            "nosniff",
+         tp/x-xss-protection                  "1; mode=block",
+         tp/x-download-options                "noopen",
+         tp/x-permitted-cross-domain-policies "none",
+         tp/content-security-policy           "object-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'strict-dynamic' https: http:;",
+         tp/content-type                      tp/text-plain})))
 
   (let [resp (pedtst/response-for (service-fn) :get "/greet" :headers {tp/accept tp/application-edn})]
     (is= (grab :status resp) 200)
