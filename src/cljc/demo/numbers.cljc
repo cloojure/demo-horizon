@@ -90,9 +90,10 @@
 
 (defn number->text-squash
   [num]
+  (println (str :number->text-squash-enter num))
   (if-not (<= MIN-VALUE num MAX-VALUE)
     (do
-     ;(println (str :number->text-squash :out-of-range "******* " num " *******;  returning blank string"))
+      (println (str :number->text-squash :out-of-range "******* " num " *******;  returning blank string"))
       "")
     (t/it-> num
       (number->text it)

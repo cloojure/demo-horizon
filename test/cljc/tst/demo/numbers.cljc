@@ -1,10 +1,10 @@
 (ns tst.demo.numbers
   (:require
     [tupelo.core :as t]
-    [demo.enflame :as flame]
     #?@(:clj [[demo.numbers :as num]
               [tupelo.test :as tst :refer [is is= dotest dotest-focus throws? ]]])
     #?@(:cljs [[demo.numbers :as num :include-macros true]
+               [demo.enflame :as flame]
                [tupelo.test-cljs :as tst   :refer [is= dotest throws? ]]]))
 )
 
