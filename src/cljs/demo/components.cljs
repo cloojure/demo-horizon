@@ -54,8 +54,6 @@
 ;   [:span {:style {:color :darkgreen}} [:strong "AJAX says: "]]
 ;   [:span {:style {:font-style :italic}} (nbsp 2) (flame/watching [:ajax-response])]])
 
-(defn str->int [it]  (js/parseInt (str/trim it))) ; #todo => tupelo.parse (& add default option)
-
 (defn root-comp []
   (let [upper-limit (flame/watching [:upper-limit])
         lower-limit (flame/watching [:lower-limit])
@@ -73,15 +71,19 @@
          {:id      :lower-limit
           ;:placeholder lower-limit
           :value   (str lower-limit)
-          :on-save #(when (t/not-empty? (str/trim %))
-                      (flame/dispatch-event [:lower-limit (str->int %)]))}]]
+          :on-save (fn [str-arg]
+                     (let [limit (flame/parse-int str-arg nil)]
+                       (when-not (nil? limit)
+                         (flame/dispatch-event [:lower-limit limit]))))}]]
        [:div
         [:label (str "Upper Limit:" (nbsp 2))]
         [input-field
          {:id      :upper-limit
           :value   (str upper-limit)
-          :on-save #(when (t/not-empty? (str/trim %))
-                      (flame/dispatch-event [:upper-limit (str->int %)]))}]]
+          :on-save (fn [str-arg]
+                     (let [limit (flame/parse-int str-arg nil)]
+                       (when-not (nil? limit)
+                         (flame/dispatch-event [:upper-limit limit]))))}]]
        [:div
         [:label (str "Target Letter:" (nbsp 2))]
         [input-field

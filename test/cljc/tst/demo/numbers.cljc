@@ -1,11 +1,12 @@
 (ns tst.demo.numbers
   (:require
     [tupelo.core :as t]
+    [demo.enflame :as flame]
     #?@(:clj [[demo.numbers :as num]
               [tupelo.test :as tst :refer [is is= dotest dotest-focus throws? ]]])
     #?@(:cljs [[demo.numbers :as num :include-macros true]
                [tupelo.test-cljs :as tst   :refer [is= dotest throws? ]]]))
-  )
+)
 
 (dotest
   (is= (num/two-digit-frag 1) "one")
@@ -95,6 +96,24 @@
     (is (t/rel= (num/letter-prob-num-words 2 4 \w) (/ 1.0 12.0) :digits 8))
 
     (is= (num/letter-stats-num-words 2 4 \r)
-      {:num-total-letters 12, :num-tgt-letter 2, :prob (/ 1.0 6.0)})
+      {:num-total-letters 12, :num-tgt-letter 2, :prob (/ 1.0 6.0)}) ))
 
-    ))
+(dotest
+  (t/spyx (flame/parse-int "123"))
+  (t/spyx (flame/parse-float "1.23"))
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
