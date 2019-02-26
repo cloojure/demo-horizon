@@ -124,92 +124,6 @@
                                        ; content-negotiation-intc
                                       respond-hello-intc]})}))
 
-;---------------------------------------------------------------------------------------------------
-
-(def default-service-map
-  "Default options for configuring a Pedestal service"
-  {::http/type          :jetty
-   ::http/port          8890 ; default port
-   ::http/host          "0.0.0.0" ; *** CRITICAL ***  to make server listen on ALL IP addrs not just `localhost`
-   ::http/join?         true ; true => block the starting thread (want this for supervisord in prod); false => don't block
-   ::http/resource-path "public" ; => use "resources/public" as base (see also ::http/file-path)
-   })
-
-(def ^:no-doc service-state (atom nil))
-
-(defn service-fn
-  "Returns the `service-function` (which can be used for testing via pedestal.test/response-for)"
-  []
-  (grab ::http/service-fn @service-state))
-
-;(defmacro service-fn []
-;  `(grab ::http/service-fn ~'service-state))
-
-;(s/defn define-service
-;  "Configures a Pedestal service by merging user-supplied options to the default configuration map"
-;  ([] (define-service {}))
-;  ([server-opts :- tsk/KeyMap]
-;    (let [opts-to-use (glue default-service-map server-opts)]
-;      (reset! service-state (http/create-server opts-to-use)))))
-
-;(s/defn clear-service
-;  "Clears configuration for Pedestal service "
-;  [] (reset! service-state nil))
-
-;(defn server-start!
-;  "Starts the Jetty HTTP server for a Pedestal service as configured via `define-service`"
-;  []
-;  (swap! service-state http/start))
-;
-;(defn server-stop!
-;  "Stops the Jetty HTTP server."
-;  []
-;  (swap! service-state http/stop))
-
-;(defn server-restart!
-;  "Stops and restarts the Jetty HTTP server for a Pedestal service"
-;  []
-;  (server-stop!)
-;  (server-start!))
-
-(defmacro with-service
-  "Run the forms in the context of a Pedestal service definition"
-  [service-map & forms]
-  `(let [opts-to-use# (glue default-service-map ~service-map)]
-    ;(spy :with-service-opts opts-to-use#)
-     (reset! service-state (http/create-server opts-to-use#))
-    ;(spy :with-service-state @service-state)
-     (try
-       ~@forms
-       (finally
-         (reset! service-state nil)))))
-
-(defmacro with-server
-  "Start & stop the server, even if exception occurs."
-  [service-map & forms]
-  `(with-service ~service-map
-     (try
-       (swap! service-state http/start) ; sends log output to stdout
-       ~@forms
-       (finally
-         (swap! service-state http/stop) ))))
-
-(s/defn invoke-interceptors
-  "Given a context and a vector of interceptor-maps, invokes the interceptor chain
-  and returns the resulting output context."
-  [ctx :- tsk/KeyMap
-   interceptors :- [tsk/KeyMap]] ; #todo => specialize to interceptor maps
-  (let [pedestal-interceptors (mapv interceptor/map->Interceptor interceptors)]
-    (chain/execute ctx pedestal-interceptors)))
-
-(defn service-get
-  "Given that a Pedestal service has been defined, return the response for an HTTP GET request.
-  Does not require a running Jetty server."
-  [& args]
-  (let [full-args (prepend (service-fn) :get args)]
-    (apply pedtst/response-for full-args)))
-
-
 ; #todo => tupelo.pedestal ???
 ;---------------------------------------------------------------------------------------------------
 
@@ -223,7 +137,7 @@
                                           port     (tpar/parse-int port-str)]
                                       (glue it {::http/port port})))]
     (spyx-pretty svc-map)
-    (with-server svc-map
+    (tp/with-server svc-map
       (println "main - server started (never print this)")
       ))
   (println "main - exit"))
