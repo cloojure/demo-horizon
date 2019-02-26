@@ -57,7 +57,7 @@
         (is= headers-actual headers-expected))))
 
   (dotest
-    ;(with-debug-tag :dbg-03)
+   ;(with-debug-tag :dbg-03)
     (let [sys-err-str (with-system-err-str ; capture jetty logging from System/err
                         (tupelo.pedestal/with-server tst-service-map ; test over http using jetty server
                           (let [resp @(http-client/get "http://localhost:8890/greet")]
@@ -111,30 +111,30 @@
 ; v3: Hello World, With Content-Types (http://pedestal.io/guides/hello-world-content-types)
 
 (dotest
-  ;(with-debug-tag :dbg-05)
-  ;(with-system-err-str) ; capture jetty logging from System/err
-  (tupelo.pedestal/with-service tst-service-map ; mock testing w/o actually starting jetty
-    (let [resp (tupelo.pedestal/service-get "/greet")]
-      (destruct [resp {:status ? :headers ? :body ?}]
-        (is= status 200)
-        (is-nonblank= body "  Hello,    World!   ")
-        (is= headers
-          {tp/strict-transport-security         "max-age=31536000; includeSubdomains",
-           tp/x-frame-options                   "DENY",
-           tp/x-content-type-options            "nosniff",
-           tp/x-xss-protection                  "1; mode=block",
-           tp/x-download-options                "noopen",
-           tp/x-permitted-cross-domain-policies "none",
-           tp/content-security-policy           "object-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'strict-dynamic' https: http:;",
-           tp/content-type                      tp/text-plain})))
+  (with-debug-tag :dbg-05
+    (with-system-err-str ; capture jetty logging from System/err
+      (tupelo.pedestal/with-service tst-service-map ; mock testing w/o actually starting jetty
+        (let [resp (tupelo.pedestal/service-get "/greet")]
+          (destruct [resp {:status ? :headers ? :body ?}]
+            (is= status 200)
+            (is-nonblank= body "  Hello,    World!   ")
+            (is= headers
+              {tp/strict-transport-security         "max-age=31536000; includeSubdomains",
+               tp/x-frame-options                   "DENY",
+               tp/x-content-type-options            "nosniff",
+               tp/x-xss-protection                  "1; mode=block",
+               tp/x-download-options                "noopen",
+               tp/x-permitted-cross-domain-policies "none",
+               tp/content-security-policy           "object-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'strict-dynamic' https: http:;",
+               tp/content-type                      tp/text-plain})))
 
-    (let [resp (tupelo.pedestal/service-get "/greet" :headers {tp/accept tp/application-edn})]
-      (is= (grab :status resp) 200)
-      (is= tp/text-plain (fetch-in resp [:headers tp/content-type])))
+        (let [resp (tupelo.pedestal/service-get "/greet" :headers {tp/accept tp/application-edn})]
+          (is= (grab :status resp) 200)
+          (is= tp/text-plain (fetch-in resp [:headers tp/content-type])))
 
-    (let [resp (tupelo.pedestal/service-get "/greet"
-                 :headers {tp/accept (str/join ", " [tp/application-xml tp/application-json])})]
-      (is= (grab :status resp) 200)
-      (is= tp/text-plain (fetch-in resp [:headers tp/content-type])))))
+        (let [resp (tupelo.pedestal/service-get "/greet"
+                     :headers {tp/accept (str/join ", " [tp/application-xml tp/application-json])})]
+          (is= (grab :status resp) 200)
+          (is= tp/text-plain (fetch-in resp [:headers tp/content-type])))))))
 
 

@@ -20,7 +20,7 @@
                  [reagent "0.8.1"]
                  [reagent-utils "0.3.2"]
                  [secretary "1.2.3"]
-                 [tupelo "0.9.131"] ]
+                 [tupelo "0.9.132"] ]
   :plugins [[com.jakemccrary/lein-test-refresh   "0.23.0"]
             [lein-ancient "0.6.15"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
