@@ -15,6 +15,8 @@
 ; NOTE:  it seems this must be in a *.cljs file or it doesn't work on figwheel reloading
 (enable-console-print!)
 
+(defn event-value [event]  (-> event .-target .-value))
+
 (defn input-field
   [{:keys [value on-save on-stop]}] ; #todo -> (with-map-vals [title on-save on-stop] ...)
   (let [text-val (r/atom value) ; local state
@@ -34,7 +36,7 @@
           :value       @text-val
           :auto-focus  true
           :on-blur     save-fn
-          :on-change   #(reset! text-val (flame/event-value %))
+          :on-change   #(reset! text-val (event-value %))
           :on-key-down #(let [rcvd (.-which %)] ; KeyboardEvent property
                           (condp = rcvd
                             char/code-point-return (save-fn)
