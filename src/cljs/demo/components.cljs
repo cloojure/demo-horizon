@@ -72,20 +72,13 @@
                                     (t/spy :on-change [evt-str text-val-next])
                                     (reset! text-val text-val-next)))
                    :on-key-down (fn [arg] ; KeyboardEvent property
-                                  (let [code-point (.-keyCode arg)
-                                        key-value-str (.-key arg)]
-                                    (t/spy :on-key-down-rcvd [code-point (.-key arg) ])
+                                  (let [key-value-str (.-key arg)]
+                                    (t/spy :on-key-down-rcvd key-value-str)
                                     (t/spy :on-key-down-value text-val)
                                     (cond
-                                     ;(= code-point char/code-point-return) (do-save)
-                                     ;(= code-point char/code-point-tab) (do-save)
-                                     ;(= code-point char/code-point-escape) (do-abort)
-
                                       (= key-value-str kvs-enter) (do-save)
                                       (= key-value-str kvs-tab) (do-save)
-                                      (= key-value-str kvs-escape) (do-abort)
-
-                                      )))
+                                      (= key-value-str kvs-escape) (do-abort))))
                    :on-key-up   (fn [arg] ; KeyboardEvent property
                                   (t/spy :on-key-up-value text-val))}]
         [:input (into user-attrs attrs)]))))
@@ -110,14 +103,14 @@
       [:div
        [:div
         [:label (str "Lower Limit:" (char/nbsp 2))]
-        [input-text {;:placeholder lower-limit
-                     :init-val (str lower-limit)
+        [input-text {:init-val (str lower-limit)
                      :save-fn  (fn [str-arg]
                                  (let [limit (parse/parse-int str-arg nil)]
                                    (when-not (nil? limit)
                                      (flame/dispatch-event [:lower-limit limit]))))}
-         {:id         :lower-limit
-          :auto-focus true}]]
+         {;:placeholder lower-limit
+          :id         :lower-limit
+          :auto-focus true }]]
        [:div
         [:label (str "Upper Limit:" (char/nbsp 2))]
         [input-text {:init-val (str upper-limit)
