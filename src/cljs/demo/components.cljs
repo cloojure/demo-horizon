@@ -65,7 +65,9 @@
   (let [text-val (r/atom (str (:init-val opts)))] ; local state
     (fn [opts]
       (let [{:keys [save-fn abort-fn max-len]} opts
-            do-save   (fn [] (save-fn (-> @text-val str str/trim)))
+            do-save   (fn []
+                        (swap! text-val #(str/trim (str %)))
+                        (save-fn @text-val))
             do-abort  (fn []
                         (reset! text-val "")
                         (when abort-fn (abort-fn)))
@@ -77,21 +79,21 @@
                        :on-blur     do-save
                        :on-change   (fn [evt]
                                       (let [evt-str       (t/validate string? (evt->val evt))
-                                            text-val-next (t/cond-it-> evt-str
+                                            text-val-next (t/cond-it-> (str/trim evt-str)
                                                             (t/not-nil? max-len) (if (= add-to :right)
                                                                                    (str-keep-right it max-len)
                                                                                    (str-keep-left it max-len)))]
                                         (t/spy :on-change [evt-str text-val-next])
                                         (reset! text-val text-val-next)))
-                       :on-key-down (fn [arg] ; KeyboardEvent property
-                                      (let [key-value-str (.-key arg)]
+                       :on-key-down (fn [kbe] ; KeyboardEvent
+                                      (let [key-value-str (.-key kbe)]
                                         (t/spy :on-key-down-rcvd key-value-str)
                                         (t/spy :on-key-down-value text-val)
                                         (cond
                                           (= key-value-str kvs-enter) (do-save)
                                           (= key-value-str kvs-tab) (do-save)
                                           (= key-value-str kvs-escape) (do-abort))))
-                       :on-key-up   (fn [arg] ; KeyboardEvent property
+                       :on-key-up   (fn [kbe] ; KeyboardEvent
                                       (t/spy :on-key-up-value text-val))}]
         [:input (into (:attrs opts) attrs-dyn)]))))
 
