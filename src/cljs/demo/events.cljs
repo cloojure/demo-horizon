@@ -31,15 +31,6 @@
   ; #todo make event mechanism check each interceptor & handler-fn for legal ctx on enter and leave
 
   (flame/define-event
-    {:event-id          :upper-limit
-     :interceptor-chain common-interceptors
-     :handler-fn        (fn upper-limit-fn
-                          [ctx event] ; #todo  make :event a key in ctx, so this becomes a standard interceptor
-                          (let [[-evt- upper-limit] event]
-                            (t/spyx :upper-limit upper-limit)
-                            (assoc-in ctx [:app-state :upper-limit] upper-limit)))})
-
-  (flame/define-event
     {:event-id          :lower-limit
      :interceptor-chain common-interceptors
      :handler-fn        (fn lower-limit-fn
@@ -47,6 +38,16 @@
                           (let [[-evt- lower-limit] event]
                             (t/spyx :lower-limit lower-limit)
                             (assoc-in ctx [:app-state :lower-limit] lower-limit)))})
+
+  (flame/define-event
+    {:event-id          :upper-limit
+     :interceptor-chain common-interceptors
+     :handler-fn        (fn upper-limit-fn
+                          [ctx event] ; #todo  make :event a key in ctx, so this becomes a standard interceptor
+                          (let [[-evt- upper-limit] event
+                                upper-limit (min upper-limit app-state/upper-limit-hard) ]
+                            (t/spyx :upper-limit upper-limit)
+                            (assoc-in ctx [:app-state :upper-limit] upper-limit)))})
 
   (flame/define-event
     {:event-id          :tgt-letter

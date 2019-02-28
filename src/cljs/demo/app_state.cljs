@@ -8,6 +8,9 @@
 ; NOTE:  it seems this must be in a *.cljs file or it doesn't work on figwheel reloading
 (enable-console-print!)
 
+(def lower-limit-hard 5)
+(def upper-limit-hard 234)
+
 ; -- Default :app-state Value  ---------------------------------------------------
 ; When the application first starts, this will be the value put in :app-state
 ; Unless, of course, there are todos in the LocalStore (see further below)

@@ -5,6 +5,7 @@
     [goog.string :as gstring]
     [oops.core :as oops]
     [reagent.core :as r]
+    [demo.app-state :as state]
     [demo.enflame :as flame]
     [tupelo.char :as char]
     [tupelo.core :as t]
@@ -56,7 +57,6 @@
                                  (when-not (nil? limit)
                                    (flame/dispatch-event [:lower-limit limit]))))
                    :abort-fn (fn [str-arg] (println :aborting))
-                   :add-to   :right
                    :attrs    {:id         :lower-limit
                               :auto-focus true}}
 "
@@ -64,14 +64,14 @@
   ; set up component local state
   (let [text-val (r/atom (str (:init-val opts)))] ; local state
     (fn [opts]
-      (let [{:keys [save-fn abort-fn max-len]} opts
+      (let [{:keys [save-fn abort-fn coercion-fn max-len ]} opts
+            coercion-fn (or coercion-fn identity)
             do-save   (fn []
-                        (swap! text-val #(str/trim (str %)))
+                        (swap! text-val #(str/trim (str (coercion-fn %))))
                         (save-fn @text-val))
             do-abort  (fn []
                         (reset! text-val "")
                         (when abort-fn (abort-fn)))
-            add-to    (get opts :add-to :right)
             attrs-dyn {; #todo need to add a validator fn (turn red if hit <ret> with bad value)
                        :type        "text"
                        :value       @text-val
@@ -80,9 +80,7 @@
                        :on-change   (fn [evt]
                                       (let [evt-str       (t/validate string? (evt->val evt))
                                             text-val-next (t/cond-it-> (str/trim evt-str)
-                                                            (t/not-nil? max-len) (if (= add-to :right)
-                                                                                   (str-keep-right it max-len)
-                                                                                   (str-keep-left it max-len)))]
+                                                            (t/not-nil? max-len) (str-keep-right it max-len) )]
                                         (t/spy :on-change [evt-str text-val-next])
                                         (reset! text-val text-val-next)))
                        :on-key-down (fn [kbe] ; KeyboardEvent
@@ -104,9 +102,18 @@
 ;   [:span {:style {:color :darkgreen}} [:strong "AJAX says: "]]
 ;   [:span {:style {:font-style :italic}} (char/nbsp 2) (flame/watching [:ajax-response])]])
 
+(defn range-coercion-fn
+  [str-arg]
+  (t/cond-it-> (parse/parse-int str-arg nil)
+    (t/not-nil? it) (-> it
+                      (max state/lower-limit-hard)
+                      (min state/upper-limit-hard)
+                      (str))))
+(defn lowercase-coercion-fn [arg] (str/lower-case arg))
+
 (defn root-comp []
-  (let [upper-limit (flame/watching [:upper-limit])
-        lower-limit (flame/watching [:lower-limit])
+  (let [lower-limit (flame/watching [:lower-limit])
+        upper-limit (flame/watching [:upper-limit])
         tgt-letter  (flame/watching [:tgt-letter])
         stats       (flame/watching [:stats])]
     [:div {:class "container"}
@@ -117,26 +124,29 @@
       [:div
        [:div
         [:label (str "Lower Limit:" (char/nbsp 2))]
-        [input-text {:init-val (str lower-limit)
-                     :save-fn  (fn [str-arg]
-                                 (let [limit (parse/parse-int str-arg nil)]
-                                   (when-not (nil? limit)
-                                     (flame/dispatch-event [:lower-limit limit]))))
-                     :attrs    {;:placeholder lower-limit
-                                :id         :lower-limit
-                                :auto-focus true}}]]
+        [input-text {:init-val    (str lower-limit)
+                     :coercion-fn range-coercion-fn
+                     :save-fn     (fn [str-arg]
+                                    (let [int-val (parse/parse-int str-arg nil)]
+                                      (when-not (nil? int-val)
+                                        (let [int-val (max int-val state/lower-limit-hard)]
+                                          (flame/dispatch-event [:lower-limit int-val])))))
+                     :attrs       {;:placeholder lower-limit
+                                   :id         :lower-limit
+                                   :auto-focus true}}]]
        [:div
         [:label (str "Upper Limit:" (char/nbsp 2))]
-        [input-text {:init-val (str upper-limit)
-                     :max-len  3
-                     :save-fn  (fn [str-arg]
-                                 (let [limit (parse/parse-int str-arg nil)]
-                                   (when-not (nil? limit)
-                                     (flame/dispatch-event [:upper-limit limit]))))
-                     :attrs    {:id :upper-limit}}]]
+        [input-text {:init-val    (str upper-limit)
+                     :coercion-fn range-coercion-fn
+                     :save-fn     (fn [str-arg]
+                                    (let [int-val (parse/parse-int str-arg nil)]
+                                      (when-not (nil? int-val)
+                                        (flame/dispatch-event [:upper-limit int-val]))))
+                     :attrs       {:id :upper-limit}}]]
        [:div
         [:label (str "Target Letter:" (char/nbsp 2))]
         [input-text {:init-val (str tgt-letter)
+                     :coercion-fn lowercase-coercion-fn
                      :max-len  1
                      :save-fn  (fn [arg]
                                  (let [letter (str/trim arg)]
