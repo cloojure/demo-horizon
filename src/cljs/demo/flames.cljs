@@ -28,12 +28,13 @@
     {:id              :stats
      :reactive-inputs [:app-state]
      :tx-fn           (fn [app-state -query-]
-                        (t/with-map-vals app-state [lower-limit upper-limit tgt-letter]
-                          (let [
-                                stats {:num-total-letters 666, :num-tgt-letter 42, :prob 3.14} ; #todo fix dummy val
-                                stats (num/letter-stats-num-words lower-limit upper-limit tgt-letter)
-                               ]
-                            stats)))})
+                        (t/with-exception-default {:num-total-letters "error" :num-tgt-letter "error" :prob "error"}
+                          (t/with-map-vals app-state [lower-limit upper-limit tgt-letter]
+                            (let [
+                                  stats {:num-total-letters 666, :num-tgt-letter 42, :prob 3.14} ; #todo fix dummy val
+                                  stats (num/letter-stats-num-words lower-limit upper-limit tgt-letter)
+                                  ]
+                              stats))))})
 
   (flame/define-flame
     {:id              :ajax-response

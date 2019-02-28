@@ -36,7 +36,6 @@
      :handler-fn        (fn lower-limit-fn
                           [ctx event]
                           (let [[-evt- lower-limit] event]
-                            (t/spyx :lower-limit lower-limit)
                             (assoc-in ctx [:app-state :lower-limit] lower-limit)))})
 
   (flame/define-event
@@ -46,7 +45,6 @@
                           [ctx event] ; #todo  make :event a key in ctx, so this becomes a standard interceptor
                           (let [[-evt- upper-limit] event
                                 upper-limit (min upper-limit app-state/upper-limit-hard) ]
-                            (t/spyx :upper-limit upper-limit)
                             (assoc-in ctx [:app-state :upper-limit] upper-limit)))})
 
   (flame/define-event
@@ -55,7 +53,6 @@
      :handler-fn        (fn tgt-letter-fn
                           [ctx event]
                           (let [[-evt- tgt-letter] event]
-                            (t/spyx :tgt-letter tgt-letter)
                             (assoc-in ctx [:app-state :tgt-letter] tgt-letter)))})
 
   (flame/define-event

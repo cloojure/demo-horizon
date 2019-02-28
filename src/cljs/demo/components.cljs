@@ -20,15 +20,12 @@
 
 (defn range-coercion-fn
   [str-arg]
-  (t/spy :coercion-fn-enter str-arg)
-  (t/spy :coercion-fn-result
-    (t/with-exception-default str-arg
-      (let [int-val(parse/parse-int str-arg)]
-        (t/spy :corecion-parse-int int-val)
-        (t/it-> int-val
-          (max it state/lower-limit-hard)
-          (min it state/upper-limit-hard)
-          (str it))))))
+  (t/with-exception-default str-arg
+    (let [int-val (parse/parse-int str-arg)]
+      (t/it-> int-val
+        (max it state/lower-limit-hard)
+        (min it state/upper-limit-hard)
+        (str it)))))
 
 (defn lowercase-coercion-fn [arg] (str/lower-case arg))
 
@@ -52,35 +49,36 @@
   ; set up component local state
   (let [text-val (r/atom (str (:init-val opts)))] ; local state
     (fn [opts]
-      (let [{:keys [save-fn abort-fn coercion-fn max-len ]} opts
+      (let [{:keys [save-fn abort-fn coercion-fn max-len]} opts
             coercion-fn (or coercion-fn identity)
-            do-save   (fn []
-                        (swap! text-val #(str/trim (str (coercion-fn %))))
-                        (save-fn @text-val))
-            do-abort  (fn []
-                        (reset! text-val "")
-                        (when abort-fn (abort-fn)))
-            attrs-dyn {; #todo need to add a validator fn (turn red if hit <ret> with bad value)
-                       :type        "text"
-                       :value       @text-val
-                       :max-length  nil
-                       :on-blur     do-save
-                       :on-change   (fn [evt]
-                                      (let [evt-str       (t/validate string? (evt->val evt))
-                                            text-val-next (t/cond-it-> (str/trim evt-str)
-                                                            (t/not-nil? max-len) (ts/str-keep-right it max-len) )]
-                                        (t/spy :on-change [evt-str text-val-next])
-                                        (reset! text-val text-val-next)))
-                       :on-key-down (fn [kbe] ; KeyboardEvent
-                                      (let [key-value-str (.-key kbe)]
-                                        (t/spy :on-key-down-rcvd key-value-str)
-                                        (t/spy :on-key-down-value text-val)
-                                        (cond
-                                          (= key-value-str char/kvs-enter) (do-save)
-                                          (= key-value-str char/kvs-tab) (do-save)
-                                          (= key-value-str char/kvs-escape) (do-abort))))
-                       :on-key-up   (fn [kbe] ; KeyboardEvent
-                                      (t/spy :on-key-up-value text-val))}]
+            do-save     (fn []
+                          (swap! text-val #(str/trim (str (coercion-fn %))))
+                          (save-fn @text-val))
+            do-abort    (fn []
+                          (reset! text-val "")
+                          (when abort-fn (abort-fn)))
+            attrs-dyn   {; #todo need to add a validator fn (turn red if hit <ret> with bad value)
+                         :type        "text"
+                         :value       @text-val
+                         :max-length  nil
+                         :on-blur     do-save
+                         :on-change   (fn [evt]
+                                        (let [evt-str       (t/validate string? (evt->val evt))
+                                              text-val-next (t/cond-it-> (str/trim evt-str)
+                                                              (t/not-nil? max-len) (ts/str-keep-right it max-len))]
+                                          ;(t/spy :on-change [evt-str text-val-next])
+                                          (reset! text-val text-val-next)))
+                         :on-key-down (fn [kbe] ; KeyboardEvent
+                                        (let [key-value-str (.-key kbe)]
+                                          ;(t/spy :on-key-down-rcvd key-value-str)
+                                          (cond
+                                            (= key-value-str char/kvs-enter) (do-save)
+                                            (= key-value-str char/kvs-tab) (do-save)
+                                            (= key-value-str char/kvs-escape) (do-abort))))
+                         :on-key-up   (fn [kbe] ; KeyboardEvent
+                                        (let [key-value-str (.-key kbe)]
+                                          ;(t/spy :on-key-up-rcvd key-value-str)
+                                          ))}]
         [:input (into (:attrs opts) attrs-dyn)]))))
 
 ;---------------------------------------------------------------------------------------------------
