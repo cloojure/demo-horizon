@@ -45,43 +45,55 @@
 
 (defn input-text
   "Create an HTML <input> element. `opts` are clojure options that control the behavior of this
-  Reagent component.  `attrs` are HTML element attributes"
-  [opts attrs]
+  Reagent component.  `attrs` are HTML element attributes. Usage:
+
+    [input-text <options-map>]
+
+  Sample Options: {:init-val (str lower-limit)
+                   :max-len  3
+                   :save-fn  (fn [str-arg]
+                               (let [limit (parse/parse-int str-arg nil)]
+                                 (when-not (nil? limit)
+                                   (flame/dispatch-event [:lower-limit limit]))))
+                   :abort-fn (fn [str-arg] (println :aborting))
+                   :add-to   :right
+                   :attrs    {:id         :lower-limit
+                              :auto-focus true}}
+"
+  [opts]
   ; set up component local state
-  (let [{:keys [init-val save-fn abort-fn max-len]} opts
-        text-val      (r/atom (str init-val)) ; local state
-        do-save       (fn [] (save-fn (-> @text-val str str/trim)))
-        do-abort      (fn []
+  (let [text-val (r/atom (str (:init-val opts)))] ; local state
+    (fn [opts]
+      (let [{:keys [save-fn abort-fn max-len]} opts
+            do-save   (fn [] (save-fn (-> @text-val str str/trim)))
+            do-abort  (fn []
                         (reset! text-val "")
                         (when abort-fn (abort-fn)))
-        add-to        (get opts :add-to :right) ]
-    ; return a clojure using local state. On initial load, Reagent will iteratively call this clojure
-    ; with the same params to get the component definition [:input ...]
-    (fn [opts user-attrs]
-      (let [attrs {; #todo need to add a validator fn (turn red if hit <ret> with bad value)
-                   :type        "text"
-                   :value       @text-val
-                   :max-length  nil
-                   :on-blur     do-save
-                   :on-change   (fn [evt]
-                                  (let [evt-str       (t/validate string? (evt->val evt))
-                                        text-val-next (t/cond-it-> evt-str
-                                                        (t/not-nil? max-len) (if (= add-to :right)
-                                                                               (str-keep-right it max-len)
-                                                                               (str-keep-left it max-len)))]
-                                    (t/spy :on-change [evt-str text-val-next])
-                                    (reset! text-val text-val-next)))
-                   :on-key-down (fn [arg] ; KeyboardEvent property
-                                  (let [key-value-str (.-key arg)]
-                                    (t/spy :on-key-down-rcvd key-value-str)
-                                    (t/spy :on-key-down-value text-val)
-                                    (cond
-                                      (= key-value-str kvs-enter) (do-save)
-                                      (= key-value-str kvs-tab) (do-save)
-                                      (= key-value-str kvs-escape) (do-abort))))
-                   :on-key-up   (fn [arg] ; KeyboardEvent property
-                                  (t/spy :on-key-up-value text-val))}]
-        [:input (into user-attrs attrs)]))))
+            add-to    (get opts :add-to :right)
+            attrs-dyn {; #todo need to add a validator fn (turn red if hit <ret> with bad value)
+                       :type        "text"
+                       :value       @text-val
+                       :max-length  nil
+                       :on-blur     do-save
+                       :on-change   (fn [evt]
+                                      (let [evt-str       (t/validate string? (evt->val evt))
+                                            text-val-next (t/cond-it-> evt-str
+                                                            (t/not-nil? max-len) (if (= add-to :right)
+                                                                                   (str-keep-right it max-len)
+                                                                                   (str-keep-left it max-len)))]
+                                        (t/spy :on-change [evt-str text-val-next])
+                                        (reset! text-val text-val-next)))
+                       :on-key-down (fn [arg] ; KeyboardEvent property
+                                      (let [key-value-str (.-key arg)]
+                                        (t/spy :on-key-down-rcvd key-value-str)
+                                        (t/spy :on-key-down-value text-val)
+                                        (cond
+                                          (= key-value-str kvs-enter) (do-save)
+                                          (= key-value-str kvs-tab) (do-save)
+                                          (= key-value-str kvs-escape) (do-abort))))
+                       :on-key-up   (fn [arg] ; KeyboardEvent property
+                                      (t/spy :on-key-up-value text-val))}]
+        [:input (into (:attrs opts) attrs-dyn)]))))
 
 ;---------------------------------------------------------------------------------------------------
 
@@ -107,29 +119,29 @@
                      :save-fn  (fn [str-arg]
                                  (let [limit (parse/parse-int str-arg nil)]
                                    (when-not (nil? limit)
-                                     (flame/dispatch-event [:lower-limit limit]))))}
-         {;:placeholder lower-limit
-          :id         :lower-limit
-          :auto-focus true }]]
+                                     (flame/dispatch-event [:lower-limit limit]))))
+                     :attrs    {;:placeholder lower-limit
+                                :id         :lower-limit
+                                :auto-focus true}}]]
        [:div
         [:label (str "Upper Limit:" (char/nbsp 2))]
         [input-text {:init-val (str upper-limit)
-                     :max-len 3
+                     :max-len  3
                      :save-fn  (fn [str-arg]
                                  (let [limit (parse/parse-int str-arg nil)]
                                    (when-not (nil? limit)
-                                     (flame/dispatch-event [:upper-limit limit]))))}
-         {:id :upper-limit}]]
+                                     (flame/dispatch-event [:upper-limit limit]))))
+                     :attrs    {:id :upper-limit}}]]
        [:div
         [:label (str "Target Letter:" (char/nbsp 2))]
         [input-text {:init-val (str tgt-letter)
-                     :max-len 1
+                     :max-len  1
                      :save-fn  (fn [arg]
                                  (let [letter (str/trim arg)]
                                    (when (and (= 1 (count letter))
                                            (char/alpha? letter))
-                                     (flame/dispatch-event [:tgt-letter letter]))))}
-         {:id :tgt-letter}]]
+                                     (flame/dispatch-event [:tgt-letter letter]))))
+                     :attrs    {:id :tgt-letter}}]]
        [:hr]
        [:div [:label (str "Results")]]
        [:div (char/nbsp 2)]
