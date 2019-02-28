@@ -44,6 +44,20 @@
   [code-point :- s/Int]
   (.fromCodePoint js/String code-point))
 
+(defn range-coercion-fn
+  [str-arg]
+  (t/spy :coercion-fn-enter str-arg)
+  (t/spy :coercion-fn-result
+    (t/with-exception-default str-arg
+      (let [int-val(parse/parse-int str-arg)]
+        (t/spy :corecion-parse-int int-val)
+        (t/it-> int-val
+          (max it state/lower-limit-hard)
+          (min it state/upper-limit-hard)
+          (str it))))))
+
+(defn lowercase-coercion-fn [arg] (str/lower-case arg))
+
 (defn input-text
   "Create an HTML <input> element. `opts` are clojure options that control the behavior of this
   Reagent component.  `attrs` are HTML element attributes. Usage:
@@ -78,6 +92,7 @@
                        :max-length  nil
                        :on-blur     do-save
                        :on-change   (fn [evt]
+                                      (t/spyx (range-coercion-fn "5x4"))
                                       (let [evt-str       (t/validate string? (evt->val evt))
                                             text-val-next (t/cond-it-> (str/trim evt-str)
                                                             (t/not-nil? max-len) (str-keep-right it max-len) )]
@@ -102,15 +117,6 @@
 ;   [:span {:style {:color :darkgreen}} [:strong "AJAX says: "]]
 ;   [:span {:style {:font-style :italic}} (char/nbsp 2) (flame/watching [:ajax-response])]])
 
-(defn range-coercion-fn
-  [str-arg]
-  (t/cond-it-> (parse/parse-int str-arg nil)
-    (t/not-nil? it) (-> it
-                      (max state/lower-limit-hard)
-                      (min state/upper-limit-hard)
-                      (str))))
-(defn lowercase-coercion-fn [arg] (str/lower-case arg))
-
 (defn root-comp []
   (let [lower-limit (flame/watching [:lower-limit])
         upper-limit (flame/watching [:upper-limit])
@@ -127,10 +133,10 @@
         [input-text {:init-val    (str lower-limit)
                      :coercion-fn range-coercion-fn
                      :save-fn     (fn [str-arg]
-                                    (let [int-val (parse/parse-int str-arg nil)]
-                                      (when-not (nil? int-val)
-                                        (let [int-val (max int-val state/lower-limit-hard)]
-                                          (flame/dispatch-event [:lower-limit int-val])))))
+                                    (try
+                                      (flame/dispatch-event [:lower-limit (parse/parse-int str-arg)])
+                                      (catch js/Error e
+                                        (println "***** lower-limit invalid: " str-arg))))
                      :attrs       {;:placeholder lower-limit
                                    :id         :lower-limit
                                    :auto-focus true}}]]
