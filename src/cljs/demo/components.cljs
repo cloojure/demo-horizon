@@ -18,32 +18,6 @@
 
 (defn evt->val [event]  (-> event .-target .-value))
 
-; #todo => tupelo.cljs.key-value-string
-(def kvs-enter "Enter")
-(def kvs-tab "Tab")
-(def kvs-escape "Escape")
-
-(defn str-keep-left ; #todo => tupelo.string
-  "Keeps the N left-most chars of a string"
-  [str-val n]
-  (str/join (take n (t/str->chars str-val))))
-
-(defn str-keep-right ; #todo => tupelo.string
-  "Keeps the N right-most chars of a string"
-  [str-val n]
-  (str/join (take-last n (t/str->chars str-val))))
-
-(defn char->code-point ; #todo => tupelo.string
-  "REturns the code-point of a character (len=1 string)"
-  [char-val]
-  (t/validate #(= 1 (count %)) char-val)
-  (.codePointAt char-val 0))
-
-(s/defn code-point->char ; #todo => tupelo.string
-  "REturns the code-point of a character (len=1 string)"
-  [code-point :- s/Int]
-  (.fromCodePoint js/String code-point))
-
 (defn range-coercion-fn
   [str-arg]
   (t/spy :coercion-fn-enter str-arg)
@@ -92,10 +66,9 @@
                        :max-length  nil
                        :on-blur     do-save
                        :on-change   (fn [evt]
-                                      (t/spyx (range-coercion-fn "5x4"))
                                       (let [evt-str       (t/validate string? (evt->val evt))
                                             text-val-next (t/cond-it-> (str/trim evt-str)
-                                                            (t/not-nil? max-len) (str-keep-right it max-len) )]
+                                                            (t/not-nil? max-len) (ts/str-keep-right it max-len) )]
                                         (t/spy :on-change [evt-str text-val-next])
                                         (reset! text-val text-val-next)))
                        :on-key-down (fn [kbe] ; KeyboardEvent
@@ -103,9 +76,9 @@
                                         (t/spy :on-key-down-rcvd key-value-str)
                                         (t/spy :on-key-down-value text-val)
                                         (cond
-                                          (= key-value-str kvs-enter) (do-save)
-                                          (= key-value-str kvs-tab) (do-save)
-                                          (= key-value-str kvs-escape) (do-abort))))
+                                          (= key-value-str char/kvs-enter) (do-save)
+                                          (= key-value-str char/kvs-tab) (do-save)
+                                          (= key-value-str char/kvs-escape) (do-abort))))
                        :on-key-up   (fn [kbe] ; KeyboardEvent
                                       (t/spy :on-key-up-value text-val))}]
         [:input (into (:attrs opts) attrs-dyn)]))))
