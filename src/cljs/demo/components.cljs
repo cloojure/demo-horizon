@@ -10,39 +10,85 @@
     [tupelo.core :as t]
     [tupelo.parse :as parse]
     [tupelo.string :as ts]
-    ))
+    [schema.core :as s]))
 
 ; NOTE:  it seems this must be in a *.cljs file or it doesn't work on figwheel reloading
 (enable-console-print!)
 
-(defn event-value [event]  (-> event .-target .-value))
+(defn evt->val [event]  (-> event .-target .-value))
 
-(defn input-field
-  [{:keys [value on-save on-stop]}] ; #todo -> (with-map-vals [title on-save on-stop] ...)
-  (let [text-val (r/atom value) ; local state
-        stop-fn  (fn []
-                   (reset! text-val "")
-                   (when on-stop (on-stop)))
-        save-fn  (fn []
-                   (on-save (-> @text-val str str/trim ))
-                   ; #todo parse into integer or replace with default (warning msg?)
-                  ;(stop-fn)
-                   )]
-    (fn [props]
-      [:input
-       (merge (dissoc props :on-save :on-stop :value)
-         {          ; #todo need to add a validator fn (turn red if hit <ret> with bad value)
-          :type        "text"
-          :value       @text-val
-          :auto-focus  true
-          :on-blur     save-fn
-          :on-change   #(reset! text-val (event-value %))
-          :on-key-down #(let [rcvd (.-which %)] ; KeyboardEvent property
-                          (condp = rcvd
-                            char/code-point-return (save-fn)
-                            char/code-point-tab (save-fn)
-                            char/code-point-escape (stop-fn)
-                            nil))})])))
+; #todo => tupelo.cljs.key-value-string
+(def kvs-enter "Enter")
+(def kvs-tab "Tab")
+(def kvs-escape "Escape")
+
+(defn str-keep-left ; #todo => tupelo.string
+  "Keeps the N left-most chars of a string"
+  [str-val n]
+  (str/join (take n (t/str->chars str-val))))
+
+(defn str-keep-right ; #todo => tupelo.string
+  "Keeps the N right-most chars of a string"
+  [str-val n]
+  (str/join (take-last n (t/str->chars str-val))))
+
+(defn char->code-point ; #todo => tupelo.string
+  "REturns the code-point of a character (len=1 string)"
+  [char-val]
+  (t/validate #(= 1 (count %)) char-val)
+  (.codePointAt char-val 0))
+
+(s/defn code-point->char ; #todo => tupelo.string
+  "REturns the code-point of a character (len=1 string)"
+  [code-point :- s/Int]
+  (.fromCodePoint js/String code-point))
+
+(defn input-text
+  "Create an HTML <input> element. `opts` are clojure options that control the behavior of this
+  Reagent component.  `attrs` are HTML element attributes"
+  [opts attrs]
+  ; set up component local state
+  (let [{:keys [init-val save-fn abort-fn max-len]} opts
+        text-val      (r/atom (str init-val)) ; local state
+        do-save       (fn [] (save-fn (-> @text-val str str/trim)))
+        do-abort      (fn []
+                        (reset! text-val "")
+                        (when abort-fn (abort-fn)))
+        add-to        (get opts :add-to :right) ]
+    ; return a clojure using local state. On initial load, Reagent will iteratively call this clojure
+    ; with the same params to get the component definition [:input ...]
+    (fn [opts user-attrs]
+      (let [attrs {; #todo need to add a validator fn (turn red if hit <ret> with bad value)
+                   :type        "text"
+                   :value       @text-val
+                   :max-length  nil
+                   :on-blur     do-save
+                   :on-change   (fn [evt]
+                                  (let [evt-str       (t/validate string? (evt->val evt))
+                                        text-val-next (t/cond-it-> evt-str
+                                                        (t/not-nil? max-len) (if (= add-to :right)
+                                                                               (str-keep-right it max-len)
+                                                                               (str-keep-left it max-len)))]
+                                    (t/spy :on-change [evt-str text-val-next])
+                                    (reset! text-val text-val-next)))
+                   :on-key-down (fn [arg] ; KeyboardEvent property
+                                  (let [code-point (.-keyCode arg)
+                                        key-value-str (.-key arg)]
+                                    (t/spy :on-key-down-rcvd [code-point (.-key arg) ])
+                                    (t/spy :on-key-down-value text-val)
+                                    (cond
+                                     ;(= code-point char/code-point-return) (do-save)
+                                     ;(= code-point char/code-point-tab) (do-save)
+                                     ;(= code-point char/code-point-escape) (do-abort)
+
+                                      (= key-value-str kvs-enter) (do-save)
+                                      (= key-value-str kvs-tab) (do-save)
+                                      (= key-value-str kvs-escape) (do-abort)
+
+                                      )))
+                   :on-key-up   (fn [arg] ; KeyboardEvent property
+                                  (t/spy :on-key-up-value text-val))}]
+        [:input (into user-attrs attrs)]))))
 
 ;---------------------------------------------------------------------------------------------------
 
@@ -64,33 +110,33 @@
       [:div
        [:div
         [:label (str "Lower Limit:" (char/nbsp 2))]
-        [input-field
-         {:id      :lower-limit
-          ;:placeholder lower-limit
-          :value   (str lower-limit)
-          :on-save (fn [str-arg]
-                     (let [limit (parse/parse-int str-arg nil)]
-                       (when-not (nil? limit)
-                         (flame/dispatch-event [:lower-limit limit]))))}]]
+        [input-text {;:placeholder lower-limit
+                     :init-val (str lower-limit)
+                     :save-fn  (fn [str-arg]
+                                 (let [limit (parse/parse-int str-arg nil)]
+                                   (when-not (nil? limit)
+                                     (flame/dispatch-event [:lower-limit limit]))))}
+         {:id         :lower-limit
+          :auto-focus true}]]
        [:div
         [:label (str "Upper Limit:" (char/nbsp 2))]
-        [input-field
-         {:id      :upper-limit
-          :value   (str upper-limit)
-          :on-save (fn [str-arg]
-                     (let [limit (parse/parse-int str-arg nil)]
-                       (when-not (nil? limit)
-                         (flame/dispatch-event [:upper-limit limit]))))}]]
+        [input-text {:init-val (str upper-limit)
+                     :max-len 3
+                     :save-fn  (fn [str-arg]
+                                 (let [limit (parse/parse-int str-arg nil)]
+                                   (when-not (nil? limit)
+                                     (flame/dispatch-event [:upper-limit limit]))))}
+         {:id :upper-limit}]]
        [:div
         [:label (str "Target Letter:" (char/nbsp 2))]
-        [input-field
-         {:id      :tgt-letter
-          :value   (str tgt-letter)
-          :on-save (fn [arg]
-                     (let [letter (str/trim arg)]
-                       (when (and (= 1 (count letter))
-                               (char/alpha? letter))
-                         (flame/dispatch-event [:tgt-letter letter]))))}]]
+        [input-text {:init-val (str tgt-letter)
+                     :max-len 1
+                     :save-fn  (fn [arg]
+                                 (let [letter (str/trim arg)]
+                                   (when (and (= 1 (count letter))
+                                           (char/alpha? letter))
+                                     (flame/dispatch-event [:tgt-letter letter]))))}
+         {:id :tgt-letter}]]
        [:hr]
        [:div [:label (str "Results")]]
        [:div (char/nbsp 2)]
