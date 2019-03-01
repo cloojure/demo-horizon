@@ -193,15 +193,17 @@
 ; #todo need plumatic schema:  event => [:kw-evt-name & args]
 (defn dispatch-event
   [& args]
-  (t/spy :dispatch-event-enter args)
+ ;(t/spy :dispatch-event-enter args)
   (apply rf/dispatch args)
-  (t/spy :dispatch-event-leave))
+ ;(t/spy :dispatch-event-leave)
+  )
 
 (defn dispatch-event-sync
   [& args]
-  (t/spy :dispatch-event-sync-enter args)
+ ;(t/spy :dispatch-event-sync-enter args)
   (apply rf/dispatch-sync args)
-  (t/spy :dispatch-event-sync-leave args))
+ ;(t/spy :dispatch-event-sync-leave args)
+  )
 
 ;****************************************************************
 ; Define built-in :app-state reactive
@@ -215,15 +217,15 @@
 (defn define-flame
   ; #todo reactive facet flame flare view vista vision scene snippet projection chunk flake shard splinter
   ; #todo slice fragment shatter sliver factor element flare beam ray glint ember glow
-  "Defines a reactive view of global state given a context map with keys [:id :reactive-inputs :tx-fn]"
+  "Defines a reactive view of global state given a context map with keys [:id :parent-flames :tx-fn]"
   [ctx]
-  (t/with-map-vals ctx [id reactive-inputs tx-fn]
+  (t/with-map-vals ctx [id parent-flames tx-fn]
     (when-not (keyword? id) (throw (ex-info "id must be a keyword" id)))
-    (when-not (vector? reactive-inputs) (throw (ex-info "reactive-inputs must be a vector" reactive-inputs)))
-    (when-not (every? keyword? reactive-inputs) (throw (ex-info "reactive values must be keywords" reactive-inputs)))
+    (when-not (vector? parent-flames) (throw (ex-info "parent-flames must be a vector" parent-flames)))
+    (when-not (every? keyword? parent-flames) (throw (ex-info "reactive values must be keywords" parent-flames)))
     (when-not (fn? tx-fn) (throw (ex-info "tx-fn must be a function" tx-fn)))
     (let [sugar-forms (vec (apply concat
-                             (for [curr-input reactive-inputs]
+                             (for [curr-input parent-flames]
                                [:<- [curr-input]])))
           args-vec    (vec (concat [id] sugar-forms [tx-fn]))]
       (apply rf/reg-sub args-vec))))

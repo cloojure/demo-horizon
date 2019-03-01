@@ -57,9 +57,9 @@ Go ahead and edit it and see reloading in action. Again, or not.")
 
   ; Put an initial value into :app-state.
   ; Using the sync version of dispatch means that value is in place before we go onto the next step.
-  (t/spy :initialize-app-state :before )
+ ;(t/spy :initialize-app-state :before )
   (flame/dispatch-event-sync [:initialize-app-state])
-  (t/spy :initialize-app-state :after )
+ ;(t/spy :initialize-app-state :after )
   ; #todo remove this - make a built-in :init that every event-handler verifies & waits for (top priority)
   ; #todo add concept of priority to event dispatch
 
