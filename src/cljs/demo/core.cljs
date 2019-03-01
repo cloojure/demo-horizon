@@ -41,19 +41,19 @@ Go ahead and edit it and see reloading in action. Again, or not.")
   "This fn is called automatically by Figwheel whenever you change a file."
   []
   (println "figwheel-reload enter => " @figwheel-reload-count)
+  (swap! figwheel-reload-count inc)
 
   ; must call both of these on each page reload since the contents are not top-level-def's
   (events/define-events)
   (flames/define-flames)
-  (swap! figwheel-reload-count inc)
 
   (println "figwheel-reload leave => " @figwheel-reload-count))
 
 (defn app-start
-  "Initiates the cljs application"
+  "Initiates the cljs application. Called upon page load/reload."
   []
   (println "**********  app-start - enter")
-  (figwheel-reload) ; force registration of flames and event handlers
+  (figwheel-reload) ; define flames and events
 
   ; Put an initial value into :app-state.
   ; Using the sync version of dispatch means that value is in place before we go onto the next step.
@@ -71,8 +71,8 @@ Go ahead and edit it and see reloading in action. Again, or not.")
 )
 
 ;***************************************************************************************************
-; kick off the app
-(app-start)         ; called upon page load/reload
+; kick off the app when this file is loaded
+(app-start)
 
 
 
