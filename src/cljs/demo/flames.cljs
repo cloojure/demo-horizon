@@ -7,7 +7,7 @@
 ; NOTE:  it seems this must be in a *.cljs file or it doesn't work on figwheel reloading
 (enable-console-print!)
 
-(defn initialize []
+(defn define-flames []
   (flame/define-flame
     {:id        :lower-limit
      :parents   [:app-state] ; #todo can we get rid of -query- here???
