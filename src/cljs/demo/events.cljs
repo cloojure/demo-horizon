@@ -14,7 +14,7 @@
    flame/ajax-intc ])
 
 ; #todo idea: maybe move event into the ctx (like req/resp in http?)
-(defn define-events []
+(defn event-config []
 
   ; This event is dispatched when the app's `main` ns is loaded (demo.core). It establishes
   ; initial application state in the context map `:app-state` key. That means merging:
@@ -70,7 +70,6 @@
                           (assoc-in ctx [:app-state :ajax-response] response))})
 
 )
-
 
 
 

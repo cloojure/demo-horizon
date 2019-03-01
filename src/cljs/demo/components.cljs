@@ -63,11 +63,16 @@
                          :max-length  nil
                          :on-blur     do-save
                          :on-change   (fn [evt]
-                                        (let [evt-str       (t/validate string? (evt->val evt))
-                                              text-val-next (t/cond-it-> (str/trim evt-str)
-                                                              (t/not-nil? max-len) (ts/str-keep-right it max-len))]
+                                        (let [evt-str          (t/validate string? (evt->val evt))
+                                              text-val-next    (t/cond-it-> (str/trim evt-str)
+                                                                 (t/not-nil? max-len) (ts/str-keep-right it max-len))
+                                              delayed-reset-fn (fn []
+                                                                 (reset! text-val evt-str) ; delay so user can see orig chars
+                                                                 (js/setTimeout #(reset! text-val text-val-next) 200))]
                                           ;(t/spy :on-change [evt-str text-val-next])
-                                          (reset! text-val text-val-next)))
+                                          (if (t/not-nil? max-len)
+                                            (delayed-reset-fn)
+                                            (reset! text-val text-val-next))))
                          :on-key-down (fn [kbe] ; KeyboardEvent
                                         (let [key-value-str (.-key kbe)]
                                           ;(t/spy :on-key-down-rcvd key-value-str)

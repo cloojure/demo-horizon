@@ -44,8 +44,8 @@ Go ahead and edit it and see reloading in action. Again, or not.")
   (swap! figwheel-reload-count inc)
 
   ; must call both of these on each page reload since the contents are not top-level-def's
-  (events/define-events)
-  (flames/define-flames)
+  (events/event-config)
+  (flames/flame-config)
 
   (println "figwheel-reload leave => " @figwheel-reload-count))
 
