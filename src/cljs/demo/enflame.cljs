@@ -217,17 +217,17 @@
 (defn define-flame
   ; #todo reactive facet flame flare view vista vision scene snippet projection chunk flake shard splinter
   ; #todo slice fragment shatter sliver factor element flare beam ray glint ember glow
-  "Defines a reactive view of global state given a context map with keys [:id :parent-flames :transformer]"
+  "Defines a reactive view of global state given a context map with keys [:id :parents :transform]"
   [ctx]
-  (t/with-map-vals ctx [id parent-flames transformer]
+  (t/with-map-vals ctx [id parents transform]
     (when-not (keyword? id) (throw (ex-info "id must be a keyword" (t/vals->map id))))
-    (when-not (vector? parent-flames) (throw (ex-info "parent-flames must be a vector" (t/vals->map parent-flames))))
-    (when-not (every? keyword? parent-flames) (throw (ex-info "reactive values must be keywords" (t/vals->map parent-flames))))
-    (when-not (fn? transformer) (throw (ex-info "transformer must be a function" (t/vals->map transformer))))
+    (when-not (vector? parents) (throw (ex-info "flame parents must be a vector" (t/vals->map parents))))
+    (when-not (every? keyword? parents) (throw (ex-info "reactive values must be keywords" (t/vals->map parents))))
+    (when-not (fn? transform) (throw (ex-info "transform must be a function" (t/vals->map transform))))
     (let [sugar-forms (vec (apply concat
-                             (for [curr-input parent-flames]
-                               [:<- [curr-input]])))
-          args-vec    (vec (concat [id] sugar-forms [transformer]))]
+                             (for [parent parents]
+                               [:<- [parent]])))
+          args-vec    (vec (concat [id] sugar-forms [transform]))]
       (apply rf/reg-sub args-vec))))
 
 ; #todo need macro  (with-path state [:app-state :todos] ...) ; extract and replace in ctx
