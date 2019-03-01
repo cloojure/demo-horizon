@@ -10,24 +10,26 @@
 (defn initialize []
   (flame/define-flame
     {:id            :lower-limit
-     :parent-flames [:app-state]
-     :tx-fn         (fn [app-state -query-] (:lower-limit app-state))})
+     :parent-flames [:app-state] ; #todo can we get rid of -query- here???
+     :transformer         (fn [app-state -query-] (:lower-limit app-state))})
+  ; #todo Rethink how these fn's are defined.  Need both app-state & query?
+  ; #todo write blog on -query- naming pattern for unused params (not `_` !!!)
 
   (flame/define-flame
     {:id            :upper-limit
      :parent-flames [:app-state]
-     :tx-fn         (fn [app-state -query-] ; #todo can we get rid of -query- here???
+     :transformer         (fn [app-state -query-]
                       (:upper-limit app-state))})
 
   (flame/define-flame
     {:id            :tgt-letter
      :parent-flames [:app-state]
-     :tx-fn         (fn [app-state -query-] (:tgt-letter app-state))})
+     :transformer         (fn [app-state -query-] (:tgt-letter app-state))})
 
   (flame/define-flame
     {:id            :stats
      :parent-flames [:app-state]
-     :tx-fn         (fn [app-state -query-]
+     :transformer         (fn [app-state -query-]
                       (t/with-exception-default {:num-total-letters "error"
                                                  :num-tgt-letter    "error"
                                                  :prob              "error"}
@@ -38,5 +40,5 @@
   (flame/define-flame
     {:id            :ajax-response
      :parent-flames [:app-state]
-     :tx-fn         (fn [app-state -query-] (:ajax-response app-state))})
+     :transformer         (fn [app-state -query-] (:ajax-response app-state))})
   )

@@ -163,7 +163,7 @@
                         :get (ajax/GET uri opts-map)
                         :put (ajax/PUT uri opts-map)
                         :post (ajax/POST uri opts-map)
-                        (throw (ex-info "ajax-intc: unrecognized :method" ajax))))))))}))
+                        (throw (ex-info "ajax-intc: unrecognized :method" (t/vals->map ajax)))))))))}))
 
 
 ;---------------------------------------------------------------------------------------------------
@@ -173,10 +173,10 @@
   "Defines the event handler given a context map with keys [:event-id :interceptor-chain :handler-fn]"
   [ctx]
   (t/with-map-vals ctx [event-id interceptor-chain handler-fn]
-    (when-not (keyword? event-id) (throw (ex-info "illegal event-id" event-id)))
-    (when-not (vector? interceptor-chain) (throw (ex-info "illegal interceptor-chain" interceptor-chain)))
-    (when-not (every? map? interceptor-chain) (throw (ex-info "illegal interceptor" interceptor-chain))) ; #todo detail intc map
-    (when-not (fn? handler-fn) (throw (ex-info "illegal handler-fn" handler-fn)))
+    (when-not (keyword? event-id) (throw (ex-info "illegal event-id" (t/vals->map event-id))))
+    (when-not (vector? interceptor-chain) (throw (ex-info "illegal interceptor-chain" (t/vals->map interceptor-chain))))
+    (when-not (every? map? interceptor-chain) (throw (ex-info "illegal interceptor" (t/vals->map interceptor-chain)))) ; #todo detail intc map
+    (when-not (fn? handler-fn) (throw (ex-info "illegal handler-fn" (t/vals->map handler-fn))))
     (let [handler-intc (interceptor
                          {:id    event-id
                           :enter (fn [ctx]
@@ -217,17 +217,17 @@
 (defn define-flame
   ; #todo reactive facet flame flare view vista vision scene snippet projection chunk flake shard splinter
   ; #todo slice fragment shatter sliver factor element flare beam ray glint ember glow
-  "Defines a reactive view of global state given a context map with keys [:id :parent-flames :tx-fn]"
+  "Defines a reactive view of global state given a context map with keys [:id :parent-flames :transformer]"
   [ctx]
-  (t/with-map-vals ctx [id parent-flames tx-fn]
-    (when-not (keyword? id) (throw (ex-info "id must be a keyword" id)))
-    (when-not (vector? parent-flames) (throw (ex-info "parent-flames must be a vector" parent-flames)))
-    (when-not (every? keyword? parent-flames) (throw (ex-info "reactive values must be keywords" parent-flames)))
-    (when-not (fn? tx-fn) (throw (ex-info "tx-fn must be a function" tx-fn)))
+  (t/with-map-vals ctx [id parent-flames transformer]
+    (when-not (keyword? id) (throw (ex-info "id must be a keyword" (t/vals->map id))))
+    (when-not (vector? parent-flames) (throw (ex-info "parent-flames must be a vector" (t/vals->map parent-flames))))
+    (when-not (every? keyword? parent-flames) (throw (ex-info "reactive values must be keywords" (t/vals->map parent-flames))))
+    (when-not (fn? transformer) (throw (ex-info "transformer must be a function" (t/vals->map transformer))))
     (let [sugar-forms (vec (apply concat
                              (for [curr-input parent-flames]
                                [:<- [curr-input]])))
-          args-vec    (vec (concat [id] sugar-forms [tx-fn]))]
+          args-vec    (vec (concat [id] sugar-forms [transformer]))]
       (apply rf/reg-sub args-vec))))
 
 ; #todo need macro  (with-path state [:app-state :todos] ...) ; extract and replace in ctx

@@ -25,8 +25,10 @@
      ; #todo make :event-id mandatory arg to flame/define-event like tped/definterceptor
      ; #todo add :event-id to handler-fn metadata
      :interceptor-chain [flame/trace-print app-state/localstore-load-intc]
-     :handler-fn        (fn [ctx -event-] ; #todo => make an explicit interceptor?  #awt (:event-handler)
+     :handler-fn        (fn [ctx -event-] ; #todo => make an explicit interceptor?
                           (assoc-in ctx [:app-state] app-state/default-state))})
+  ; #todo add event to ctx under :event (remove from handler args)
+  ; #todo rename key to :event-handler-fn
 
   ; #todo make event mechanism check each interceptor & handler-fn for legal ctx on enter and leave
 
