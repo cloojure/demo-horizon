@@ -9,15 +9,15 @@
 
 (defn initialize []
   (flame/define-flame
+    {:id            :lower-limit
+     :parent-flames [:app-state]
+     :tx-fn         (fn [app-state -query-] (:lower-limit app-state))})
+
+  (flame/define-flame
     {:id            :upper-limit
      :parent-flames [:app-state]
      :tx-fn         (fn [app-state -query-] ; #todo can we get rid of -query- here???
                       (:upper-limit app-state))})
-
-  (flame/define-flame
-    {:id            :lower-limit
-     :parent-flames [:app-state]
-     :tx-fn         (fn [app-state -query-] (:lower-limit app-state))})
 
   (flame/define-flame
     {:id            :tgt-letter
@@ -28,12 +28,11 @@
     {:id            :stats
      :parent-flames [:app-state]
      :tx-fn         (fn [app-state -query-]
-                      (t/with-exception-default {:num-total-letters "error" :num-tgt-letter "error" :prob "error"}
+                      (t/with-exception-default {:num-total-letters "error"
+                                                 :num-tgt-letter    "error"
+                                                 :prob              "error"}
                         (t/with-map-vals app-state [lower-limit upper-limit tgt-letter]
-                          (let [
-                                stats {:num-total-letters 666, :num-tgt-letter 42, :prob 3.14} ; #todo fix dummy val
-                                stats (num/letter-stats-num-words lower-limit upper-limit tgt-letter)
-                                ]
+                          (let [stats (num/letter-stats-num-words lower-limit upper-limit tgt-letter)]
                             stats))))})
 
   (flame/define-flame
